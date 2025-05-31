@@ -1,0 +1,2256 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GestOccasIA - Interface Avancée V3.9</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.5.3/signature_pad.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f7f8fc; 
+        }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .app-shell { 
+            min-height: 100vh; 
+        }
+        .sidebar {
+            width: 260px; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 2rem 1.5rem; display: flex; flex-direction: column; transition: width 0.3s ease-in-out;
+            position: fixed; top: 0; left: 0; height: 100vh; z-index: 20; overflow-y: auto; 
+        }
+        .sidebar-header { display: flex; align-items: center; margin-bottom: 2.5rem; padding-left: 0.5rem; }
+        .sidebar-header i { font-size: 2rem; color: #4f46e5; }
+        .sidebar-header h1 { font-size: 1.5rem; font-weight: 700; color: #334155; margin-left: 0.75rem; }
+
+        .nav-menu a {
+            display: flex; align-items: center; padding: 0.85rem 1rem; margin-bottom: 0.5rem;
+            border-radius: 0.5rem; font-weight: 500; color: #475569;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        .nav-menu a:hover { background-color: #eef2ff; color: #4f46e5; }
+        .nav-menu a.active {
+            background-color: #4f46e5; color: #ffffff;
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3), 0 2px 4px -1px rgba(79, 70, 229, 0.2);
+        }
+        .nav-menu a i { margin-right: 0.85rem; width: 20px; text-align: center; }
+
+        .main-content { 
+            margin-left: 260px; padding: 2rem; 
+            width: calc(100% - 260px); 
+            overflow-y: auto; min-height: 100vh; 
+        }
+        .content-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;
+            background-color: #ffffff; padding: 1.5rem; border-radius: 0.75rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+        .content-header h2 { font-size: 1.75rem; font-weight: 600; color: #1e293b; }
+        .date-time span { font-size: 0.875rem; color: #64748b; }
+
+        .form-card, .content-card {
+            background-color: #ffffff; padding: 2rem; border-radius: 0.75rem;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05); margin-bottom: 2rem;
+        }
+        .form-card-title, .content-card-title {
+            font-size: 1.25rem; font-weight: 600; color: #334155; margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem; border-bottom: 1px solid #e5e7eb;
+        }
+        .form-label { display: block; font-size: 0.875rem; font-weight: 500; color: #4b5563; margin-bottom: 0.375rem; }
+        .form-input, .form-select, .form-textarea {
+            width: 100%; padding: 0.625rem 0.875rem; border: 1px solid #d1d5db;
+            border-radius: 0.375rem; background-color: #fff; box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none; border-color: #4f46e5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+        }
+        .form-textarea { min-height: 100px; }
+        .file-input-styled {
+            @apply block w-full text-sm text-slate-500
+            file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0
+            file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700
+            hover:file:bg-indigo-100 cursor-pointer;
+        }
+
+        .btn {
+            padding: 0.75rem 1.25rem; border-radius: 0.375rem; font-weight: 600;
+            font-size: 0.9rem; transition: all 0.2s ease;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            display: inline-flex; align-items: center; justify-content: center;
+        }
+        .btn i { margin-right: 0.5rem; }
+        .btn-primary { background-color: #4f46e5; color: white; }
+        .btn-primary:hover { background-color: #4338ca; }
+        .btn-secondary { background-color: #e5e7eb; color: #374151; border: 1px solid #d1d5db; }
+        .btn-secondary:hover { background-color: #d1d5db; }
+        .btn-success { background-color: #10b981; color: white; }
+        .btn-success:hover { background-color: #059669; }
+        .btn-danger { background-color: #ef4444; color: white; }
+        .btn-danger:hover { background-color: #dc2626; }
+        .btn-icon { padding: 0.625rem; }
+        .btn-small { padding: 0.5rem 0.75rem; font-size: 0.8rem; }
+
+        .message-box { 
+            position: fixed; top: 1.5rem; right: 1.5rem; padding: 1rem 1.5rem;
+            border-radius: 0.5rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+            color: white; z-index: 1000; display: none; min-width: 300px;
+        }
+        .message-box.success { background-color: #10b981; }
+        .message-box.error { background-color: #ef4444; }
+        .message-box.info { background-color: #3b82f6; }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeInContent 0.5s ease-out; }
+        @keyframes fadeInContent {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .placeholder-card { 
+             @apply bg-white p-8 rounded-lg shadow-md text-center border border-dashed border-slate-300;
+        }
+        .placeholder-card i { @apply text-5xl text-slate-400 mb-4; }
+        .placeholder-card p { @apply text-slate-500 text-lg; }
+
+        .document-preview-content { font-size: 0.9rem; line-height: 1.6; color: #333; }
+        .document-preview-content h4, .document-preview-content h2 { font-size: 1.5rem; font-weight: 700; color: #4f46e5; margin-bottom: 1.5rem; text-align: center; }
+        .document-preview-content strong { font-weight: 600; color: #111827; }
+        .document-preview-content .section-group { margin-bottom: 1rem; padding-left: 1rem; border-left: 3px solid #e0e7ff; }
+        .document-preview-content .signature-area-placeholder { margin-top: 2.5rem; padding-top: 1rem; border-top: 1px dashed #cbd5e1; }
+        .document-preview-content .signature-box-placeholder { border-top: 1px solid #9ca3af; height: 4rem; }
+        #signaturePreview { max-width: 200px; max-height: 100px; border: 1px solid #eee; margin-top: 5px;}
+        #signedCessionModalImageInModal { max-width: 200px; max-height: 100px; border: 1px solid #eee; margin-top: 5px;}
+
+        .data-table { width: 100%; border-collapse: collapse; } 
+        .data-table th, .data-table td { 
+            padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid #e5e7eb;
+        }
+        .data-table th {
+            background-color: #f9fafb; font-weight: 600; color: #374151; font-size: 0.875rem;
+        }
+        .data-table td { font-size: 0.875rem; color: #4b5563; }
+        .data-table tbody tr:hover { background-color: #f3f4f6; }
+
+
+        .status-badge { 
+            padding: 0.25rem 0.6rem; border-radius: 9999px; font-size: 0.75rem;
+            font-weight: 500; text-transform: capitalize; display: inline-block;
+        }
+        .status-pending_check { background-color: #fef3c7; color: #92400e; } 
+        .status-under_test { background-color: #dbeafe; color: #1e40af; } 
+        .status-tests_ok_awaiting_price { background-color: #e0e7ff; color: #3730a3; } 
+        .status-awaiting_repair { background-color: #fee2e2; color: #991b1b; } 
+        .status-ok_for_sale { background-color: #d1fae5; color: #065f46; } 
+        .status-sold { background-color: #c4b5fd; color: #5b21b6; } 
+        .status-rejected_for_parts { background-color: #fecaca; color: #991b1b;} 
+        .status-rejected { background-color: #e5e7eb; color: #4b5563; } 
+
+        .modal-overlay { 
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5); 
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000; opacity: 0; visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-content { 
+            background-color: #fff; padding: 2rem; border-radius: 0.75rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 90%; max-width: 700px; 
+            max-height: 90vh; overflow-y: auto;
+            transform: scale(0.95); transition: transform 0.3s ease;
+        }
+        .modal-overlay.active .modal-content { transform: scale(1); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .modal-title { font-size: 1.5rem; font-weight: 600; color: #1e293b; }
+        .modal-close-btn {
+            background: none; border: none; font-size: 1.5rem; color: #9ca3af; cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        .modal-close-btn:hover { color: #4b5563; }
+
+        .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+        .detail-item strong { display: block; font-size: 0.8rem; color: #6b7280; margin-bottom: 0.1rem; text-transform: uppercase; }
+        .detail-item span { font-size: 0.95rem; color: #374151; }
+        
+        .checklist-item input[type="checkbox"] {
+            @apply h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 mr-3; /* Increased margin */
+        }
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.6rem; /* Slightly increased vertical spacing */
+        }
+        .checklist-item label {
+            @apply text-sm text-slate-700 flex-1; /* Allow label to take remaining space */
+        }
+
+
+        #signaturePadContainer { border: 1px dashed #cbd5e1; border-radius: 0.375rem; position: relative; }
+        #signaturePad { display: block; margin: 0 auto; } 
+        .signature-pad-actions { margin-top: 0.5rem; display: flex; justify-content: space-between; }
+
+        #invoiceToPrintContainer {
+            position: absolute; left: -9999px; width: 210mm; 
+            font-family: Arial, sans-serif; font-size: 10pt; color: #000;
+        }
+        #invoiceToPrintContainer h1, #invoiceToPrintContainer h2, #invoiceToPrintContainer h3 { color: #000; }
+        #invoiceToPrintContainer strong { font-weight: bold; }
+        #invoiceToPrintContainer table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        #invoiceToPrintContainer th, #invoiceToPrintContainer td { border: 1px solid #ccc; padding: 5px; text-align: left; }
+        #invoiceToPrintContainer th { background-color: #f0f0f0; }
+        #invoiceToPrintContainer .text-right { text-align: right; }
+        #invoiceToPrintContainer .totals { margin-top: 20px; }
+        #invoiceToPrintContainer .tva-mention { font-size: 8pt; margin-top: 20px; }
+
+        .search-results-container { margin-top: 1.5rem; }
+        .search-result-item {
+            @apply bg-white p-4 mb-3 rounded-md shadow-sm border border-slate-200 hover:shadow-md transition-shadow;
+        }
+        .search-result-item h4 { @apply font-semibold text-indigo-600 mb-1; }
+        .search-result-item p { @apply text-sm text-slate-600; }
+        .search-result-item .type-badge {
+            @apply inline-block px-2 py-0.5 text-xs font-semibold rounded-full mr-2;
+        }
+        .type-achat { @apply bg-blue-100 text-blue-700; }
+        .type-stock { @apply bg-yellow-100 text-yellow-700; }
+        .type-vente { @apply bg-green-100 text-green-700; }
+
+        .report-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        .report-table th, .report-table td {
+            border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; font-size: 0.875rem;
+        }
+        .report-table th { background-color: #f1f5f9; font-weight: 600; }
+        .report-table tfoot td { font-weight: bold; background-color: #f8fafc; }
+        .report-summary { margin-top: 1.5rem; padding: 1rem; background-color: #eef2ff; border-radius: 0.5rem; }
+        .report-summary p { margin-bottom: 0.5rem; font-size: 0.95rem; }
+        .report-summary strong { font-weight: 600; }
+        .report-actions { margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 0.5rem; }
+
+        /* Styles pour la section des composants à remplacer */
+        .component-list-item {
+            @apply flex justify-between items-center p-2 border-b border-slate-100;
+        }
+        .component-list-item .actions button { @apply text-red-500 hover:text-red-700 ml-2; }
+
+    </style>
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="sidebar-header"> <i class="fas fa-recycle"></i> <h1>GestOccasIA</h1> </div>
+            <nav class="nav-menu mt-4 flex-grow">
+                <a href="#" class="tab-button active" data-tab="dashboard"><i class="fas fa-tachometer-alt fa-fw"></i> Tableau de Bord</a>
+                <a href="#" class="tab-button" data-tab="achats"><i class="fas fa-shopping-cart fa-fw"></i> Achats</a>
+                <a href="#" class="tab-button" data-tab="stock"><i class="fas fa-boxes-stacked fa-fw"></i> Stock</a>
+                <a href="#" class="tab-button" data-tab="ventes"><i class="fas fa-hand-holding-dollar fa-fw"></i> Ventes</a>
+                <a href="#" class="tab-button" data-tab="spare_parts"><i class="fas fa-tools fa-fw"></i> Pièces Détachées</a>
+                <a href="#" class="tab-button" data-tab="rapports"><i class="fas fa-chart-pie fa-fw"></i> Rapports</a>
+                <a href="#" class="tab-button" data-tab="parametres"><i class="fas fa-sliders fa-fw"></i> Paramètres</a>
+            </nav>
+            <div class="mt-auto text-center text-xs text-slate-400"> <p>&copy; <span id="currentYearSidebar"></span> 2A Mobile</p> </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="content-header">
+                <h2 id="pageTitle">Tableau de Bord</h2>
+                <div class="date-time text-right"> <span id="currentDate"></span><br> <span id="currentTime" class="font-medium text-indigo-600"></span> </div>
+            </div>
+
+            <div id="tab-dashboard" class="tab-content active">
+                <div class="content-card">
+                    <h3 class="content-card-title"><i class="fas fa-search mr-3 text-indigo-500"></i>Recherche Globale</h3>
+                    <div class="flex items-center space-x-2">
+                        <input type="text" id="globalSearchInput" class="form-input flex-grow" placeholder="Rechercher IMEI, nom vendeur/client, modèle...">
+                        <button id="btnGlobalSearch" class="btn btn-primary hidden"><i class="fas fa-search"></i>Rechercher</button> </div>
+                    <div id="globalSearchResultsContainer" class="search-results-container">
+                        <p class="text-slate-500 text-center py-4">Entrez un terme de recherche pour trouver des transactions.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-achats" class="tab-content">
+                <form id="formAchat" class="form-card">
+                    <h3 class="form-card-title flex items-center"><i class="fas fa-user-edit mr-3 text-indigo-500"></i>Informations du Vendeur</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5 mb-6">
+                        <div> <label for="vendeurNom" class="form-label">Nom <span class="text-red-500">*</span></label> <input type="text" id="vendeurNom" name="vendeurNom" required class="form-input" placeholder="Dupont"> </div>
+                        <div> <label for="vendeurPrenom" class="form-label">Prénom <span class="text-red-500">*</span></label> <input type="text" id="vendeurPrenom" name="vendeurPrenom" required class="form-input" placeholder="Jean"> </div>
+                        <div class="md:col-span-2"> <label for="vendeurAdresse" class="form-label">Adresse Complète <span class="text-red-500">*</span></label> <input type="text" id="vendeurAdresse" name="vendeurAdresse" required class="form-input" placeholder="123 Rue de la Paix, 75000 Paris"> </div>
+                        <div> <label for="vendeurTelephone" class="form-label">Téléphone</label> <input type="tel" id="vendeurTelephone" name="vendeurTelephone" class="form-input" placeholder="06 12 34 56 78"> </div>
+                        <div> <label for="vendeurEmail" class="form-label">Email</label> <input type="email" id="vendeurEmail" name="vendeurEmail" class="form-input" placeholder="jean.dupont@email.com"> </div>
+                        <div class="md:col-span-2">
+                            <label for="vendeurPieceIdentite" class="form-label">Scan Pièce d'Identité (PDF, JPG, PNG) <span class="text-red-500">*</span></label>
+                            <div class="flex items-center space-x-3">
+                                <input type="file" id="vendeurPieceIdentite" name="vendeurPieceIdentite" required accept=".pdf,.jpg,.jpeg,.png" class="file-input-styled flex-grow">
+                                <button type="button" id="btnSimulerOcr" class="btn btn-secondary btn-icon" title="Simuler l'extraction OCR"> <i class="fas fa-wand-magic-sparkles"></i> </button>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-1">L'IA peut lire ce document. Cliquez sur <i class="fas fa-wand-magic-sparkles text-xs"></i> pour simuler.</p>
+                        </div>
+                    </div>
+                    <h3 class="form-card-title flex items-center mt-8"><i class="fas fa-mobile-screen-button mr-3 text-purple-500"></i>Informations du Produit</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                        <div> <label for="produitCategorie" class="form-label">Catégorie <span class="text-red-500">*</span></label> <select id="produitCategorie" name="produitCategorie" required class="form-select"> <option value="">Sélectionner...</option> <option value="smartphone">Smartphone</option> <option value="ordinateur_portable">Ordinateur Portable</option> <option value="ordinateur_bureau">Ordinateur de Bureau</option> <option value="tablette">Tablette</option> <option value="autre">Autre</option> </select> </div>
+                        <div> 
+                            <label for="produitMarque" class="form-label">Marque <span class="text-red-500">*</span></label> 
+                            <input type="text" id="produitMarque" name="produitMarque" required class="form-input" placeholder="Ex: Apple, Samsung" list="marquesDataList">
+                            <datalist id="marquesDataList"></datalist>
+                            <p class="text-xs text-slate-500 mt-1">Saisie prédictive basée sur l'historique.</p>
+                        </div>
+                        <div> 
+                            <label for="produitModele" class="form-label">Modèle <span class="text-red-500">*</span></label> 
+                            <input type="text" id="produitModele" name="produitModele" required class="form-input" placeholder="Ex: iPhone 14 Pro, Galaxy S23" list="modelesDataList">
+                            <datalist id="modelesDataList"></datalist>
+                             <p class="text-xs text-slate-500 mt-1">Saisie prédictive basée sur l'historique.</p>
+                        </div>
+                        <div> <label for="produitImeiSn" class="form-label">IMEI / N° Série <span class="text-red-500">*</span></label> <input type="text" id="produitImeiSn" name="produitImeiSn" required class="form-input" placeholder="IMEI ou S/N"> </div>
+                        <div> <label for="produitCapacite" class="form-label">Capacité</label> <input type="text" id="produitCapacite" name="produitCapacite" class="form-input" placeholder="Ex: 256Go"> </div>
+                        <div> <label for="produitCouleur" class="form-label">Couleur</label> <input type="text" id="produitCouleur" name="produitCouleur" class="form-input" placeholder="Ex: Noir Sidéral"> </div>
+                        <div class="md:col-span-2"> <label for="produitEtatDeclare" class="form-label">État Déclaré <span class="text-red-500">*</span></label> <select id="produitEtatDeclare" name="produitEtatDeclare" required class="form-select"> <option value="">Sélectionner...</option> <option value="comme_neuf">Comme neuf</option> <option value="bon_etat">Bon état</option> <option value="etat_moyen">État moyen</option> <option value="endommage">Endommagé</option> <option value="pour_pieces">Pour pièces</option> </select> </div>
+                        <div> <label for="produitPrixAchat" class="form-label">Prix d'Achat (€) <span class="text-red-500">*</span></label> <input type="number" id="produitPrixAchat" name="produitPrixAchat" required step="0.01" min="0" class="form-input" placeholder="Ex: 350.00"> </div>
+                        <div> <label for="produitMoyenPaiement" class="form-label">Moyen Paiement <span class="text-red-500">*</span></label> <select id="produitMoyenPaiement" name="produitMoyenPaiement" required class="form-select"> <option value="">Sélectionner...</option> <option value="especes">Espèces</option> <option value="cb">Carte Bancaire</option> <option value="virement">Virement</option> </select> </div>
+                        <div class="md:col-span-2"> <label for="produitDateAchat" class="form-label">Date d'Achat <span class="text-red-500">*</span></label> <input type="date" id="produitDateAchat" name="produitDateAchat" required class="form-input"> </div>
+                    </div>
+                    <div class="mt-10 text-right"> <button type="submit" id="btnEnregistrerAchat" class="btn btn-primary"> <i class="fas fa-save"></i>Enregistrer & Générer Cession </button> </div>
+                </form>
+                <div id="previewLettreCessionWrapper" class="form-card hidden mt-8">
+                    <h3 class="form-card-title flex items-center"><i class="fas fa-file-signature mr-3 text-green-500"></i>Prévisualisation & Signature Lettre de Cession</h3>
+                    <div id="lettreCessionPourPdf" class="p-4 border border-slate-200 rounded-md bg-slate-50 mb-6 document-preview-content">
+                        <div id="contenuLettreCession"></div>
+                        <div id="signatureDisplayAreaInLetter" class="mt-4">
+                            <p class="font-semibold text-sm">Signature du Vendeur:</p>
+                            <img id="signaturePreview" src="#" alt="Signature du vendeur" class="hidden"/>
+                        </div>
+                    </div>
+                    <div id="signaturePadSection">
+                        <label class="form-label">Signez ici (Vendeur):</label>
+                        <div id="signaturePadContainer"> <canvas id="signaturePad"></canvas> </div>
+                        <div class="signature-pad-actions">
+                            <button type="button" id="clearSignatureBtn" class="btn btn-secondary btn-small"><i class="fas fa-eraser"></i>Effacer</button>
+                            <button type="button" id="confirmSignatureBtn" class="btn btn-success btn-small"><i class="fas fa-check"></i>Confirmer Signature</button>
+                        </div>
+                    </div>
+                    <div class="mt-6 text-right"> <button type="button" id="btnTelechargerLettre" class="btn btn-primary" disabled> <i class="fas fa-download"></i>Télécharger (PDF) </button> </div>
+                </div>
+            </div>
+
+            <div id="tab-stock" class="tab-content">
+                <div class="content-card">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                        <h3 class="content-card-title !mb-0 whitespace-nowrap"><i class="fas fa-boxes-stacked mr-3 text-blue-500"></i>Articles en Stock</h3>
+                        <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
+                            <input type="text" id="stockSearchInput" class="form-input sm:w-64" placeholder="Rechercher IMEI, modèle...">
+                            <select id="stockFilterStatus" class="form-select sm:w-48">
+                                <option value="">Tous les statuts</option>
+                                <option value="pending_check">En attente de vérification</option>
+                                <option value="under_test">En test</option>
+                                <option value="tests_ok_awaiting_price">Tests OK - Attente Prix</option>
+                                <option value="awaiting_repair">Attente réparation</option>
+                                <option value="ok_for_sale">OK pour vente</option>
+                                <option value="sold">Vendu</option>
+                                <option value="rejected_for_parts">Rejeté (pour pièces)</option>
+                                <option value="rejected">Rejeté (autre)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="data-table stock-table">
+                            <thead>
+                                <tr>
+                                    <th>ID Achat</th><th>IMEI/SN</th><th>Marque</th><th>Modèle</th>
+                                    <th>Date Achat</th><th>Statut</th><th>Prix Vente</th><th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stockTableBody"></tbody>
+                        </table>
+                    </div>
+                    <div id="stockEmptyMessage" class="text-center py-8 text-slate-500 hidden">
+                        <i class="fas fa-box-open fa-3x mb-3"></i>
+                        <p>Aucun article en stock pour le moment.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-ventes" class="tab-content">
+                <div class="content-card mb-8">
+                    <h3 class="content-card-title"><i class="fas fa-store mr-3 text-orange-500"></i>Articles Disponibles à la Vente</h3>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                        <input type="text" id="venteStockSearchInput" class="form-input sm:w-72" placeholder="Rechercher article (IMEI, modèle...)">
+                        <select id="venteStockFilterCategorie" class="form-select sm:w-56">
+                            <option value="">Toutes catégories</option>
+                            <option value="smartphone">Smartphone</option>
+                            <option value="ordinateur_portable">Ordinateur Portable</option>
+                            <option value="ordinateur_bureau">Ordinateur de Bureau</option>
+                            <option value="tablette">Tablette</option>
+                            <option value="autre">Autre</option>
+                        </select>
+                    </div>
+                    <div class="overflow-x-auto max-h-96"> <table id="availableStockForSaleTable" class="data-table w-full">
+                            <thead>
+                                <tr>
+                                    <th>ID Stock</th><th>Marque</th><th>Modèle</th><th>IMEI/SN</th><th>Prix Sugg.</th><th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="availableStockForSaleContainer">
+                                </tbody>
+                        </table>
+                    </div>
+                     <div id="availableStockEmptyMessage" class="text-center py-6 text-slate-500 hidden">
+                        <i class="fas fa-store-slash fa-3x mb-3"></i>
+                        <p>Aucun article disponible à la vente pour le moment ou correspondant à vos filtres.</p>
+                    </div>
+                </div>
+
+                <div id="formVenteCard" class="form-card hidden"> <h3 class="form-card-title flex items-center"><i class="fas fa-cash-register mr-3 text-green-500"></i>Finaliser la Vente</h3>
+                    <form id="formVente">
+                        <input type="hidden" id="venteSelectedStockItemId" name="venteSelectedStockItemId">
+                        <div class="mb-4 p-3 bg-indigo-50 border border-indigo-200 rounded-md">
+                            <p class="text-sm font-semibold text-indigo-700">Article Sélectionné:</p>
+                            <p id="venteSelectedArticleInfo" class="text-sm text-indigo-600">-</p>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                            <div>
+                                <label for="ventePrix" class="form-label">Prix de Vente (€) <span class="text-red-500">*</span></label>
+                                <input type="number" id="ventePrix" name="ventePrix" required step="0.01" min="0" class="form-input" placeholder="Ex: 450.00">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label for="venteNomAcheteur" class="form-label">Nom de l'Acheteur <span class="text-red-500">*</span></label>
+                                <input type="text" id="venteNomAcheteur" name="venteNomAcheteur" required class="form-input" placeholder="Nom Prénom ou Société">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label for="venteAdresseAcheteur" class="form-label">Adresse Acheteur</label>
+                                <input type="text" id="venteAdresseAcheteur" name="venteAdresseAcheteur" class="form-input" placeholder="123 Rue du Client">
+                            </div>
+                            <div>
+                                <label for="venteTelAcheteur" class="form-label">Téléphone Acheteur</label>
+                                <input type="tel" id="venteTelAcheteur" name="venteTelAcheteur" class="form-input" placeholder="06 XX XX XX XX">
+                            </div>
+                            <div>
+                                <label for="venteEmailAcheteur" class="form-label">Email Acheteur</label>
+                                <input type="email" id="venteEmailAcheteur" name="venteEmailAcheteur" class="form-input" placeholder="client@email.com">
+                            </div>
+                             <div>
+                                <label for="venteMoyenPaiement" class="form-label">Moyen de Paiement <span class="text-red-500">*</span></label>
+                                <select id="venteMoyenPaiement" name="venteMoyenPaiement" required class="form-select">
+                                    <option value="">Sélectionner...</option>
+                                    <option value="especes">Espèces</option>
+                                    <option value="cb">Carte Bancaire</option>
+                                    <option value="virement">Virement</option>
+                                    <option value="cheque">Chèque</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="venteDate" class="form-label">Date de Vente <span class="text-red-500">*</span></label>
+                                <input type="date" id="venteDate" name="venteDate" required class="form-input">
+                            </div>
+                             <div class="md:col-span-2">
+                                <label for="venteNotes" class="form-label">Notes (optionnel)</label>
+                                <textarea id="venteNotes" name="venteNotes" class="form-input form-textarea" placeholder="Informations complémentaires..."></textarea>
+                            </div>
+                        </div>
+                        <div class="mt-10 flex justify-between items-center">
+                            <button type="button" id="btnCancelVente" class="btn btn-secondary"><i class="fas fa-times"></i>Annuler</button>
+                            <button type="submit" id="btnEnregistrerVente" class="btn btn-success"><i class="fas fa-check-circle"></i>Enregistrer la Vente</button>
+                        </div>
+                    </form>
+                </div>
+                 <div id="ventesListCard" class="content-card mt-8">
+                    <h3 class="content-card-title"><i class="fas fa-history mr-3 text-slate-500"></i>Historique des Ventes</h3>
+                    <div id="ventesListContainer"> <p class="text-slate-500">Aucune vente enregistrée.</p> </div>
+                </div>
+            </div>
+            
+            <div id="tab-spare_parts" class="tab-content">
+                <div class="content-card">
+                    <div class="flex justify-between items-center mb-4 pb-4 border-b">
+                        <h3 class="content-card-title !mb-0 !border-b-0"><i class="fas fa-tools mr-3 text-teal-500"></i>Pièces Détachées d'Occasion</h3>
+                        <button id="btnAddSparePartManually" class="btn btn-success btn-small"><i class="fas fa-plus"></i>Ajouter Pièce Manuellement</button>
+                    </div>
+                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <input type="text" id="sparePartsSearchInput" class="form-input md:col-span-1" placeholder="Rechercher pièce, modèle original...">
+                        <select id="sparePartsFilterMarque" class="form-select">
+                            <option value="">Toutes Marques Orig.</option>
+                        </select>
+                        <select id="sparePartsFilterEtat" class="form-select">
+                            <option value="">Tous États</option>
+                            <option value="Fonctionnel (Récupéré)">Fonctionnel (Récupéré)</option>
+                            <option value="Neuf">Neuf</option>
+                            <option value="À Tester">À Tester</option>
+                            <option value="Défectueux">Défectueux</option>
+                        </select>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table id="sparePartsTable" class="data-table w-full">
+                            <thead>
+                                <tr>
+                                    <th>ID Pièce</th>
+                                    <th>Nom Pièce</th>
+                                    <th>Appareil Orig.</th>
+                                    <th>Couleur Orig.</th>
+                                    <th>État Pièce</th>
+                                    <th>Emplacement</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sparePartsTableBody"></tbody>
+                        </table>
+                    </div>
+                    <div id="sparePartsEmptyMessage" class="text-center py-6 text-slate-500 hidden">
+                        <i class="fas fa-box-open fa-3x mb-3"></i>
+                        <p>Aucune pièce détachée disponible.</p>
+                    </div>
+                </div>
+            </div>
+
+
+            <div id="tab-rapports" class="tab-content">
+                <div class="content-card">
+                    <h3 class="content-card-title"><i class="fas fa-file-invoice-dollar mr-3 text-cyan-500"></i>Générer un Rapport</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 items-end">
+                        <div>
+                            <label for="reportType" class="form-label">Type de Rapport</label>
+                            <select id="reportType" class="form-select">
+                                <option value="tva_marge_mensuelle">Déclaration TVA sur Marge Mensuelle</option>
+                                <option value="tva_marge_annuelle">Déclaration TVA sur Marge Annuelle</option>
+                                </select>
+                        </div>
+                        <div id="reportMonthSelectorDiv">
+                            <label for="reportMonth" class="form-label">Mois</label>
+                            <select id="reportMonth" class="form-select"></select>
+                        </div>
+                        <div>
+                            <label for="reportYear" class="form-label">Année</label>
+                            <select id="reportYear" class="form-select"></select>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <button id="btnGenerateReport" class="btn btn-primary"><i class="fas fa-cogs"></i>Générer le Rapport</button>
+                    </div>
+                </div>
+                <div id="reportOutputCard" class="content-card hidden mt-8">
+                    <div class="flex justify-between items-center">
+                        <h3 id="reportOutputTitle" class="content-card-title !border-b-0 !mb-0">Résultat du Rapport</h3>
+                        <div id="reportActionsContainer" class="report-actions hidden">
+                            <button id="btnDownloadReportPDF" class="btn btn-secondary btn-small"><i class="fas fa-file-pdf"></i>Exporter PDF</button>
+                            <button id="btnDownloadReportCSV" class="btn btn-secondary btn-small"><i class="fas fa-file-csv"></i>Exporter CSV</button>
+                        </div>
+                    </div>
+                    <div id="reportOutputContainer" class="overflow-x-auto mt-4">
+                        </div>
+                </div>
+            </div>
+
+            <div id="tab-parametres" class="tab-content">
+                 <div class="form-card">
+                    <h3 class="form-card-title"><i class="fas fa-store-alt mr-3 text-slate-500"></i>Informations du Magasin</h3>
+                    <div class="space-y-4">
+                        <div> <label class="form-label">Nom du Magasin</label> <input type="text" id="paramNomMagasin" class="form-input bg-slate-100 cursor-not-allowed" value="2A Mobile" readonly> </div>
+                        <div> <label class="form-label">Adresse</label> <input type="text" id="paramAdresseMagasin" class="form-input bg-slate-100 cursor-not-allowed" value="239 av Theodore Braun 69400 Villefranche" readonly> </div>
+                        <div> <label class="form-label">SIRET</label> <input type="text" id="paramSiretMagasin" class="form-input bg-slate-100 cursor-not-allowed" value="51060703900037" readonly> </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <div id="messageBox" class="message-box"></div>
+
+    <div id="stockItemModal" class="modal-overlay">
+        <div class="modal-content !max-w-4xl"> 
+            <div class="modal-header"> 
+                <h3 id="modalTitle" class="modal-title">Détails de l'Article</h3> 
+                <button id="modalCloseBtn" class="modal-close-btn" aria-label="Fermer">&times;</button> 
+            </div>
+            <div id="modalBody" class="space-y-6">
+                <section class="p-4 border border-slate-200 rounded-md bg-slate-50">
+                    <h4 class="text-lg font-semibold text-slate-700 mb-3 pb-2 border-b border-slate-300">Informations Générales</h4>
+                    <div class="detail-grid mb-3">
+                        <div class="detail-item"><strong>ID Article Stock:</strong> <span id="modalStockId"></span></div>
+                        <div class="detail-item"><strong>ID Achat:</strong> <span id="modalPurchaseId"></span></div>
+                        <div class="detail-item"><strong>IMEI/SN:</strong> <span id="modalImeiSn"></span></div>
+                        <div class="detail-item"><strong>Marque:</strong> <span id="modalMarque"></span></div>
+                        <div class="detail-item"><strong>Modèle:</strong> <span id="modalModele"></span></div>
+                        <div class="detail-item"><strong>Date Achat:</strong> <span id="modalDateAchat"></span></div>
+                        <div class="detail-item"><strong>Prix Achat:</strong> <span id="modalPrixAchat"></span> €</div>
+                    </div>
+                    <div>
+                        <button id="btnViewSignedCession" class="btn btn-info btn-small"><i class="fas fa-file-signature"></i>Voir Lettre de Cession Signée</button>
+                    </div>
+                </section>
+                
+                <section class="p-4 border border-slate-200 rounded-md">
+                    <h4 class="text-lg font-semibold text-slate-700 mb-4 pb-2 border-b border-slate-300">Statut & Prix de Vente</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+                        <div> 
+                            <label for="modalItemStatus" class="form-label">Statut Actuel:</label> 
+                            <select id="modalItemStatus" class="form-select"> 
+                                <option value="pending_check">En attente de vérification</option> 
+                                <option value="under_test">En test</option> 
+                                <option value="tests_ok_awaiting_price">Tests OK - Attente Prix</option>
+                                <option value="awaiting_repair">Attente réparation</option> 
+                                <option value="ok_for_sale">OK pour vente</option> 
+                                <option value="sold">Vendu</option> 
+                                <option value="rejected_for_parts">Rejeté (pour pièces)</option>
+                                <option value="rejected">Rejeté (autre)</option> 
+                            </select> 
+                        </div>
+                        <div> 
+                            <label for="modalSellingPrice" class="form-label">Prix de Vente (€):</label> 
+                            <input type="number" id="modalSellingPrice" class="form-input" placeholder="0.00" step="0.01">
+                        </div>
+                    </div>
+                    <div class="mt-4 text-right"> 
+                        <button id="btnSaveStatusAndPrice" class="btn btn-primary"><i class="fas fa-save"></i>Enregistrer Statut & Prix</button> 
+                    </div>
+                </section>
+
+                <section class="p-4 border border-slate-200 rounded-md">
+                    <h4 class="text-lg font-semibold text-slate-700 mb-3 pb-2 border-b border-slate-300">Vérification Technique (Smartphone) <span class="text-red-500">*</span></h4>
+                    <p class="text-xs text-slate-500 mb-3">La validation complète de cette checklist est requise pour certains statuts.</p>
+                    <div id="modalChecklistContainer" class="space-y-1 max-h-60 overflow-y-auto pr-2"></div>
+                </section>
+
+                <section class="p-4 border border-slate-200 rounded-md">
+                    <h4 class="text-lg font-semibold text-slate-700 mb-3 pb-2 border-b border-slate-300">Composants à Remplacer</h4>
+                    <div class="flex space-x-2 mb-3">
+                        <input type="text" id="componentToReplaceName" class="form-input flex-grow" placeholder="Nom du composant (ex: Écran, Batterie)">
+                        <button type="button" id="addComponentToReplaceBtn" class="btn btn-secondary btn-small"><i class="fas fa-plus"></i>Ajouter</button>
+                    </div>
+                    <div id="componentsToReplaceList" class="space-y-1 max-h-40 overflow-y-auto pr-2"></div>
+                </section>
+                
+                <section class="p-4 border border-slate-200 rounded-md">
+                    <h4 class="text-lg font-semibold text-slate-700 mb-3 pb-2 border-b border-slate-300">Appareil Non Réparable (Pour Pièces)</h4>
+                    <div class="flex items-center mb-3">
+                        <input type="checkbox" id="modalIsNonRepairable" class="h-4 w-4 text-red-600 border-gray-300 rounded focus:ring-red-500 mr-2">
+                        <label for="modalIsNonRepairable" class="form-label !mb-0">Marquer comme non réparable / pour pièces</label>
+                    </div>
+                    <div id="nonRepairableSection" class="hidden space-y-4">
+                        <div>
+                            <label for="modalSalvageStorageLocation" class="form-label">Emplacement de Stockage (Pièces): <span class="text-red-500 hidden" id="salvageLocationRequiredStar">*</span></label>
+                            <input type="text" id="modalSalvageStorageLocation" class="form-input" placeholder="Ex: BAC 1, Tiroir A2">
+                        </div>
+                        <div>
+                            <p class="form-label mb-2">Composants Fonctionnels Récupérables:</p>
+                            <div id="modalSalvageChecklistContainer" class="space-y-1 max-h-40 overflow-y-auto pr-2"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="p-4 border border-slate-200 rounded-md">
+                    <h4 class="text-lg font-semibold text-slate-700 mb-3 pb-2 border-b border-slate-300">Notes Générales du Technicien</h4>
+                    <textarea id="modalTechnicianNotes" class="form-input form-textarea" placeholder="Détails des tests, observations, pièces changées..."></textarea>
+                </section>
+
+                <div class="mt-8 text-right border-t pt-6"> 
+                    <button id="btnSaveTechDetails" class="btn btn-success"><i class="fas fa-cogs"></i>Sauvegarder Intervention Technique</button> 
+                </div>
+            </div>
+            <div class="modal-footer mt-6 text-right"> 
+                <button id="modalCloseBtnFooter" class="btn btn-secondary">Fermer</button> 
+            </div>
+        </div>
+    </div>
+    
+    <div id="viewCessionModal" class="modal-overlay">
+        <div class="modal-content !max-w-4xl"> <div class="modal-header">
+                <h3 class="modal-title">Lettre de Cession</h3>
+                <button id="closeViewCessionModalBtn" class="modal-close-btn" aria-label="Fermer">&times;</button>
+            </div>
+            <div id="viewCessionModalBodyContainer" class="p-4 border border-slate-200 rounded-md bg-slate-50 document-preview-content">
+                </div>
+        </div>
+    </div>
+
+    <div id="invoiceToPrintContainer" class="hidden"></div>
+
+    <div id="sparePartModal" class="modal-overlay">
+        <div class="modal-content !max-w-2xl">
+            <div class="modal-header">
+                <h3 id="sparePartModalTitle" class="modal-title">Ajouter/Modifier Pièce Détachée</h3>
+                <button id="closeSparePartModalBtn" class="modal-close-btn" aria-label="Fermer">&times;</button>
+            </div>
+            <form id="formSparePart">
+                <input type="hidden" id="sparePartEditingId">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                    <div>
+                        <label for="sparePartName" class="form-label">Nom de la Pièce <span class="text-red-500">*</span></label>
+                        <input type="text" id="sparePartName" name="sparePartName" required class="form-input" placeholder="Ex: Écran iPhone 12" list="sparePartNamesDataList">
+                        <datalist id="sparePartNamesDataList"></datalist>
+                    </div>
+                    <div>
+                        <label for="sparePartOriginalDeviceMarque" class="form-label">Marque Appareil Origine</label>
+                        <input type="text" id="sparePartOriginalDeviceMarque" name="sparePartOriginalDeviceMarque" class="form-input" placeholder="Ex: Apple" list="sparePartMarquesDataList">
+                        <datalist id="sparePartMarquesDataList"></datalist>
+                    </div>
+                    <div>
+                        <label for="sparePartOriginalDeviceModele" class="form-label">Modèle Appareil Origine</label>
+                        <input type="text" id="sparePartOriginalDeviceModele" name="sparePartOriginalDeviceModele" class="form-input" placeholder="Ex: iPhone 12" list="sparePartModelesDataList">
+                        <datalist id="sparePartModelesDataList"></datalist>
+                    </div>
+                     <div>
+                        <label for="sparePartColor" class="form-label">Couleur Pièce/App. Orig.</label>
+                        <input type="text" id="sparePartColor" name="sparePartColor" class="form-input" placeholder="Ex: Noir, Blanc" list="sparePartColorsDataList">
+                        <datalist id="sparePartColorsDataList"></datalist>
+                    </div>
+                    <div>
+                        <label for="sparePartCondition" class="form-label">État de la Pièce <span class="text-red-500">*</span></label>
+                        <select id="sparePartCondition" name="sparePartCondition" required class="form-select">
+                            <option value="Fonctionnel (Récupéré)">Fonctionnel (Récupéré)</option>
+                            <option value="Neuf">Neuf</option>
+                            <option value="À Tester">À Tester</option>
+                            <option value="Défectueux">Défectueux</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="sparePartStorageLocation" class="form-label">Emplacement de Stockage</label>
+                        <input type="text" id="sparePartStorageLocation" name="sparePartStorageLocation" class="form-input" placeholder="Ex: BAC A1" list="sparePartStorageLocationsDataList">
+                        <datalist id="sparePartStorageLocationsDataList"></datalist>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="sparePartNotes" class="form-label">Notes</label>
+                        <textarea id="sparePartNotes" name="sparePartNotes" class="form-input form-textarea" placeholder="Notes additionnelles sur la pièce..."></textarea>
+                    </div>
+                </div>
+                <div class="mt-6 text-right">
+                    <button type="button" id="cancelSparePartFormBtn" class="btn btn-secondary mr-2">Annuler</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i>Enregistrer Pièce</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("DOMContentLoaded fired for GestOccasIA V3.9"); 
+        const pageTitleElement = document.getElementById('pageTitle');
+        const dbName = 'gestOccasIA_DB';
+        let signaturePadInstance = null; 
+        let currentPurchaseForSignature = null; 
+        const TVA_RATE = 0.20; 
+
+        // Initialisation de la base de données locale
+        function initDB() { 
+            if (!localStorage.getItem(dbName)) {
+                const initialDB = {
+                    purchases: [], stockItems: [], sales: [], spareParts: [], 
+                    purchaseIdCounter: 0, stockItemIdCounter: 0, saleIdCounter: 0, sparePartIdCounter: 0,
+                    marquesSaisies: ["Apple", "Samsung", "Huawei", "Xiaomi", "Oppo", "Google"], 
+                    modelesSaisis: { 
+                        "Apple": ["iPhone 12", "iPhone 13 Pro", "iPhone SE"],
+                        "Samsung": ["Galaxy S21", "Galaxy A52", "Galaxy Z Fold 3"]
+                    },
+                    sparePartPredictiveData: {
+                        names: ["Écran LCD", "Batterie", "Connecteur de charge", "Caméra arrière", "Vitre arrière"],
+                        marques: ["Apple", "Samsung", "Huawei", "Xiaomi"],
+                        modeles: { 
+                            "Apple": ["iPhone X", "iPhone 11", "iPhone 12"],
+                            "Samsung": ["Galaxy S10", "Galaxy S20", "Galaxy A51"]
+                        },
+                        colors: ["Noir", "Blanc", "Or", "Bleu", "Rouge"],
+                        locations: ["BAC A1", "BAC A2", "TIROIR B1", "ÉTAGÈRE C3"]
+                    }
+                };
+                localStorage.setItem(dbName, JSON.stringify(initialDB));
+                console.log("Base de données initialisée avec sparePartPredictiveData.");
+            } else {
+                let db = JSON.parse(localStorage.getItem(dbName));
+                if (!db.sparePartPredictiveData) {
+                    db.sparePartPredictiveData = {
+                        names: ["Écran LCD", "Batterie", "Connecteur de charge", "Caméra arrière", "Vitre arrière"],
+                        marques: ["Apple", "Samsung", "Huawei", "Xiaomi"],
+                        modeles: {
+                            "Apple": ["iPhone X", "iPhone 11", "iPhone 12"],
+                            "Samsung": ["Galaxy S10", "Galaxy S20", "Galaxy A51"]
+                        },
+                        colors: ["Noir", "Blanc", "Or", "Bleu", "Rouge"],
+                        locations: ["BAC A1", "BAC A2", "TIROIR B1", "ÉTAGÈRE C3"]
+                    };
+                    localStorage.setItem(dbName, JSON.stringify(db));
+                    console.log("sparePartPredictiveData ajouté à la base de données existante.");
+                } else {
+                    console.log("Base de données existante trouvée avec sparePartPredictiveData.");
+                }
+            }
+        }
+        initDB();
+        function getDB() { return JSON.parse(localStorage.getItem(dbName)); }
+        function saveDB(db) { localStorage.setItem(dbName, JSON.stringify(db)); }
+
+        function updateDateTime() { 
+            const now = new Date();
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            if(document.getElementById('currentDate')) document.getElementById('currentDate').textContent = now.toLocaleDateString('fr-FR', dateOptions);
+            if(document.getElementById('currentTime')) document.getElementById('currentTime').textContent = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+            if(document.getElementById('currentYearSidebar')) {
+                 document.getElementById('currentYearSidebar').textContent = now.getFullYear();
+            }
+        }
+        updateDateTime(); setInterval(updateDateTime, 60000);
+
+        const dateAchatInput = document.getElementById('produitDateAchat');
+        if (dateAchatInput) dateAchatInput.valueAsDate = new Date();
+        const venteDateInput = document.getElementById('venteDate');
+        if (venteDateInput) venteDateInput.valueAsDate = new Date();
+
+        const formAchat = document.getElementById('formAchat');
+        const btnEnregistrerAchat = document.getElementById('btnEnregistrerAchat');
+        const previewLettreCessionWrapper = document.getElementById('previewLettreCessionWrapper');
+        const contenuLettreCession = document.getElementById('contenuLettreCession');
+        const btnTelechargerLettre = document.getElementById('btnTelechargerLettre');
+        const btnSimulerOcr = document.getElementById('btnSimulerOcr');
+        const signaturePadContainer = document.getElementById('signaturePadContainer');
+        const signaturePadCanvas = document.getElementById('signaturePad');
+        const clearSignatureBtn = document.getElementById('clearSignatureBtn');
+        const confirmSignatureBtn = document.getElementById('confirmSignatureBtn');
+        const signaturePreview = document.getElementById('signaturePreview');
+        const marquesDataList = document.getElementById('marquesDataList');
+        const modelesDataList = document.getElementById('modelesDataList');
+        const produitMarqueInput = document.getElementById('produitMarque');
+        const produitModeleInput = document.getElementById('produitModele');
+
+        const stockTableBody = document.getElementById('stockTableBody');
+        const stockEmptyMessage = document.getElementById('stockEmptyMessage');
+        const stockSearchInput = document.getElementById('stockSearchInput');
+        const stockFilterStatus = document.getElementById('stockFilterStatus');
+        
+        const stockItemModal = document.getElementById('stockItemModal');
+        const modalCloseBtn = document.getElementById('modalCloseBtn');
+        const modalCloseBtnFooter = document.getElementById('modalCloseBtnFooter');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalStockId = document.getElementById('modalStockId');
+        const modalPurchaseId = document.getElementById('modalPurchaseId');
+        const modalImeiSn = document.getElementById('modalImeiSn');
+        const modalMarque = document.getElementById('modalMarque');
+        const modalModele = document.getElementById('modalModele');
+        const modalDateAchat = document.getElementById('modalDateAchat');
+        const modalPrixAchat = document.getElementById('modalPrixAchat');
+        const modalItemStatus = document.getElementById('modalItemStatus');
+        const modalSellingPrice = document.getElementById('modalSellingPrice');
+        const modalChecklistContainer = document.getElementById('modalChecklistContainer');
+        const modalTechnicianNotes = document.getElementById('modalTechnicianNotes');
+        const btnSaveStatusAndPrice = document.getElementById('btnSaveStatusAndPrice');
+        const btnSaveTechDetails = document.getElementById('btnSaveTechDetails');
+        const btnViewSignedCession = document.getElementById('btnViewSignedCession');
+        const componentToReplaceNameInput = document.getElementById('componentToReplaceName');
+        const addComponentToReplaceBtn = document.getElementById('addComponentToReplaceBtn');
+        const componentsToReplaceListDiv = document.getElementById('componentsToReplaceList');
+        const modalIsNonRepairableCheckbox = document.getElementById('modalIsNonRepairable');
+        const nonRepairableSectionDiv = document.getElementById('nonRepairableSection');
+        const modalSalvageStorageLocationInput = document.getElementById('modalSalvageStorageLocation');
+        const modalSalvageChecklistContainer = document.getElementById('modalSalvageChecklistContainer');
+        const salvageLocationRequiredStar = document.getElementById('salvageLocationRequiredStar'); // Référence à l'étoile
+        let currentEditingStockItemId = null;
+        let componentsToReplace = []; 
+
+        const viewCessionModal = document.getElementById('viewCessionModal');
+        const closeViewCessionModalBtn = document.getElementById('closeViewCessionModalBtn');
+        const viewCessionModalBodyContainer = document.getElementById('viewCessionModalBodyContainer');
+
+        const formVenteCard = document.getElementById('formVenteCard');
+        const formVente = document.getElementById('formVente');
+        const venteSelectedStockItemIdInput = document.getElementById('venteSelectedStockItemId');
+        const venteSelectedArticleInfo = document.getElementById('venteSelectedArticleInfo');
+        const venteStockSearchInput = document.getElementById('venteStockSearchInput');
+        const venteStockFilterCategorie = document.getElementById('venteStockFilterCategorie');
+        const availableStockForSaleContainer = document.getElementById('availableStockForSaleContainer');
+        const availableStockEmptyMessage = document.getElementById('availableStockEmptyMessage');
+        const ventePrixInput = document.getElementById('ventePrix');
+        const btnEnregistrerVente = document.getElementById('btnEnregistrerVente');
+        const btnCancelVente = document.getElementById('btnCancelVente');
+        const ventesListContainer = document.getElementById('ventesListContainer');
+        const invoiceToPrintContainer = document.getElementById('invoiceToPrintContainer');
+
+        const globalSearchInput = document.getElementById('globalSearchInput');
+        const globalSearchResultsContainer = document.getElementById('globalSearchResultsContainer');
+
+        const reportTypeSelect = document.getElementById('reportType');
+        const reportMonthSelect = document.getElementById('reportMonth');
+        const reportMonthSelectorDiv = document.getElementById('reportMonthSelectorDiv');
+        const reportYearSelect = document.getElementById('reportYear');
+        const btnGenerateReport = document.getElementById('btnGenerateReport');
+        const reportOutputCard = document.getElementById('reportOutputCard');
+        const reportOutputTitle = document.getElementById('reportOutputTitle');
+        const reportOutputContainer = document.getElementById('reportOutputContainer');
+        const reportActionsContainer = document.getElementById('reportActionsContainer');
+        const btnDownloadReportPDF = document.getElementById('btnDownloadReportPDF');
+        const btnDownloadReportCSV = document.getElementById('btnDownloadReportCSV');
+        let currentReportDataForExport = null; 
+
+        const sparePartsSearchInput = document.getElementById('sparePartsSearchInput');
+        const sparePartsTableBody = document.getElementById('sparePartsTableBody');
+        const sparePartsEmptyMessage = document.getElementById('sparePartsEmptyMessage');
+        const btnAddSparePartManually = document.getElementById('btnAddSparePartManually');
+        const sparePartModal = document.getElementById('sparePartModal');
+        const closeSparePartModalBtn = document.getElementById('closeSparePartModalBtn');
+        const formSparePart = document.getElementById('formSparePart');
+        const sparePartModalTitle = document.getElementById('sparePartModalTitle');
+        const sparePartEditingIdInput = document.getElementById('sparePartEditingId');
+        const cancelSparePartFormBtn = document.getElementById('cancelSparePartFormBtn');
+        const sparePartsFilterMarque = document.getElementById('sparePartsFilterMarque');
+        const sparePartsFilterEtat = document.getElementById('sparePartsFilterEtat');
+        const sparePartNamesDataList = document.getElementById('sparePartNamesDataList');
+        const sparePartMarquesDataList = document.getElementById('sparePartMarquesDataList');
+        const sparePartModelesDataList = document.getElementById('sparePartModelesDataList');
+        const sparePartColorsDataList = document.getElementById('sparePartColorsDataList');
+        const sparePartStorageLocationsDataList = document.getElementById('sparePartStorageLocationsDataList');
+        const modalSparePartNameInput = document.getElementById('sparePartName');
+        const modalSparePartOriginalDeviceMarqueInput = document.getElementById('sparePartOriginalDeviceMarque');
+
+        const messageBox = document.getElementById('messageBox');
+        function showMessage(message, type = 'success', duration = 4000) { 
+            if (!messageBox) { console.error("MessageBox element not found"); return; }
+            messageBox.textContent = message;
+            messageBox.className = 'message-box'; 
+            messageBox.classList.add(type);
+            messageBox.style.display = 'block'; messageBox.style.opacity = '0';
+            setTimeout(() => { messageBox.style.opacity = '1'; }, 10);
+            setTimeout(() => {
+                messageBox.style.opacity = '0';
+                setTimeout(() => { messageBox.style.display = 'none'; }, 300);
+            }, duration);
+        }
+
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const tabTitles = {
+            dashboard: "Tableau de Bord", achats: "Enregistrer un Nouvel Achat", 
+            stock: "Gestion du Stock", ventes: "Nouvelle Vente & Historique",
+            spare_parts: "Pièces Détachées d'Occasion",
+            rapports: "Rapports & Analyses", parametres: "Paramètres de l'Application"
+        };
+        
+        tabButtons.forEach(button => { 
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetTab = button.dataset.tab;
+                
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => {
+                    if(content) content.classList.remove('active');
+                });
+                
+                button.classList.add('active');
+                const activeTabContent = document.getElementById(`tab-${targetTab}`);
+                
+                if (activeTabContent) {
+                     activeTabContent.classList.add('active');
+                } else {
+                    console.error("Contenu de l'onglet non trouvé pour :", targetTab);
+                    return; 
+                }
+                
+                if(pageTitleElement) pageTitleElement.textContent = tabTitles[targetTab] || "GestOccasIA";
+
+                if (targetTab === 'stock') renderStockTable();
+                if (targetTab === 'ventes') { renderAvailableStockForSale(); renderVentesList(); if(formVenteCard) formVenteCard.classList.add('hidden'); }
+                if (targetTab === 'achats') loadPredictiveInputs();
+                if (targetTab === 'rapports') initReportSelectors();
+                if (targetTab === 'spare_parts') {
+                    renderSparePartsTable();
+                    populateSparePartsFilters();
+                }
+            });
+        });
+        
+        const defaultActiveButton = document.querySelector('.tab-button[data-tab="dashboard"]');
+        if (defaultActiveButton) {
+            defaultActiveButton.click();
+        } else {
+            console.error("Bouton de l'onglet par défaut (dashboard) non trouvé.");
+        }
+
+        function loadPredictiveInputs() { 
+            if (!marquesDataList || !modelesDataList || !produitMarqueInput) return;
+            const db = getDB();
+            marquesDataList.innerHTML = '';
+            (db.marquesSaisies || []).forEach(marque => {
+                const option = document.createElement('option'); option.value = marque; marquesDataList.appendChild(option);
+            });
+            modelesDataList.innerHTML = '';
+            const currentMarque = produitMarqueInput.value.trim();
+            const modelesSaisis = db.modelesSaisis || {};
+            const modelesToShow = currentMarque && modelesSaisis[currentMarque] ? modelesSaisis[currentMarque] : Object.values(modelesSaisis).flat();
+            new Set(modelesToShow).forEach(modele => { 
+                 const option = document.createElement('option'); option.value = modele; modelesDataList.appendChild(option);
+            });
+        }
+        if(produitMarqueInput) produitMarqueInput.addEventListener('input', loadPredictiveInputs); 
+        if(produitMarqueInput) produitMarqueInput.addEventListener('change', (e) => { 
+            const db = getDB();
+            const marque = e.target.value.trim();
+            if (marque && !(db.marquesSaisies || []).includes(marque)) {
+                if(!db.marquesSaisies) db.marquesSaisies = [];
+                db.marquesSaisies.push(marque);
+                if (!db.modelesSaisis) db.modelesSaisis = {};
+                if (!db.modelesSaisis[marque]) db.modelesSaisis[marque] = [];
+                saveDB(db);
+                loadPredictiveInputs(); 
+            }
+        });
+        if(produitModeleInput) produitModeleInput.addEventListener('change', (e) => { 
+            const db = getDB();
+            const modele = e.target.value.trim();
+            const marque = produitMarqueInput.value.trim();
+            if (modele && marque) {
+                if (!db.modelesSaisis) db.modelesSaisis = {};
+                if (!db.modelesSaisis[marque]) db.modelesSaisis[marque] = [];
+                if (!db.modelesSaisis[marque].includes(modele)) {
+                    db.modelesSaisis[marque].push(modele);
+                    saveDB(db);
+                    loadPredictiveInputs();
+                }
+            }
+        });
+
+        function resizeCanvas() { 
+            if (!signaturePadCanvas || !signaturePadCanvas.offsetParent) return; 
+            const ratio =  Math.max(window.devicePixelRatio || 1, 1);
+            signaturePadCanvas.width = signaturePadCanvas.offsetWidth * ratio;
+            signaturePadCanvas.height = signaturePadCanvas.offsetHeight * ratio;
+            signaturePadCanvas.getContext("2d").scale(ratio, ratio);
+            if (signaturePadInstance) signaturePadInstance.clear();
+        }
+        function initSignaturePad() { 
+            if (!signaturePadCanvas || !signaturePadContainer || !btnTelechargerLettre || !signaturePreview) return;
+            if (signaturePadInstance) signaturePadInstance.off();
+            signaturePadInstance = new SignaturePad(signaturePadCanvas, {
+                backgroundColor: 'rgb(255, 255, 255)', penColor: 'rgb(0, 0, 0)'
+            });
+            signaturePadCanvas.style.width = '100%'; 
+            signaturePadCanvas.style.height = '150px'; 
+            resizeCanvas(); 
+            btnTelechargerLettre.disabled = true; 
+            signaturePreview.classList.add('hidden');
+            signaturePreview.src = '#'; 
+        }
+        window.addEventListener('resize', resizeCanvas); 
+
+        if (clearSignatureBtn) { 
+            clearSignatureBtn.addEventListener('click', () => {
+                if (signaturePadInstance) signaturePadInstance.clear();
+                if(signaturePreview) { signaturePreview.classList.add('hidden'); signaturePreview.src = '#'; }
+                if(btnTelechargerLettre) btnTelechargerLettre.disabled = true;
+            });
+        }
+        if (confirmSignatureBtn) { 
+            confirmSignatureBtn.addEventListener('click', () => {
+                if (signaturePadInstance && !signaturePadInstance.isEmpty()) {
+                    const signatureDataUrl = signaturePadInstance.toDataURL(); 
+                    if(signaturePreview) { signaturePreview.src = signatureDataUrl; signaturePreview.classList.remove('hidden');}
+                    if(btnTelechargerLettre) btnTelechargerLettre.disabled = false;
+                    showMessage("Signature confirmée.", "success");
+                    if (currentPurchaseForSignature) currentPurchaseForSignature.signatureDataUrl = signatureDataUrl;
+                } else { showMessage("Veuillez signer avant de confirmer.", "info"); }
+            });
+        }
+        
+        if(btnSimulerOcr) btnSimulerOcr.addEventListener('click', () => { 
+            const pieceIdentiteInput = document.getElementById('vendeurPieceIdentite');
+            if (pieceIdentiteInput.files.length === 0) { showMessage("Sélectionnez un fichier pour simuler l'OCR.", 'info'); return; }
+            if(document.getElementById('vendeurNom')) document.getElementById('vendeurNom').value = 'Moreau'; 
+            if(document.getElementById('vendeurPrenom')) document.getElementById('vendeurPrenom').value = 'Lucas';
+            if(document.getElementById('vendeurAdresse')) document.getElementById('vendeurAdresse').value = '15 Rue de la République, 69002 Lyon (Simulé)';
+            showMessage('Données OCR simulées et insérées.', 'info');
+        });
+
+        if(formAchat) formAchat.addEventListener('submit', function(event) { 
+            event.preventDefault();
+            const originalButtonHtml = btnEnregistrerAchat.innerHTML;
+            btnEnregistrerAchat.disabled = true;
+            btnEnregistrerAchat.innerHTML = '<i class="fas fa-spinner fa-spin"></i>Enregistrement...';
+
+            setTimeout(() => { 
+                const formData = new FormData(formAchat);
+                const purchaseData = Object.fromEntries(formData.entries());
+                currentPurchaseForSignature = { ...purchaseData }; 
+
+                let db = getDB();
+                db.purchaseIdCounter++;
+                const purchaseId = `ACH-${String(db.purchaseIdCounter).padStart(3, '0')}`;
+                const newPurchase = { id: purchaseId, ...purchaseData, signatureDataUrl: null }; 
+                db.purchases.push(newPurchase);
+                
+                const marque = purchaseData.produitMarque.trim(); const modele = purchaseData.produitModele.trim();
+                if (marque && !(db.marquesSaisies || []).includes(marque)) {
+                    if(!db.marquesSaisies) db.marquesSaisies = [];
+                    db.marquesSaisies.push(marque);
+                }
+                if (marque && modele) {
+                    if (!db.modelesSaisis) db.modelesSaisis = {};
+                    if (!db.modelesSaisis[marque]) db.modelesSaisis[marque] = [];
+                    if (!db.modelesSaisis[marque].includes(modele)) db.modelesSaisis[marque].push(modele);
+                }
+
+                db.stockItemIdCounter++;
+                const stockItemId = `STK-${String(db.stockItemIdCounter).padStart(3, '0')}`;
+                const newStockItem = {
+                    id: stockItemId, purchaseId: purchaseId, imeiSn: purchaseData.produitImeiSn,
+                    marque: purchaseData.produitMarque, modele: purchaseData.produitModele,
+                    categorie: purchaseData.produitCategorie, couleur: purchaseData.produitCouleur, 
+                    dateAchat: purchaseData.produitDateAchat, prixAchat: purchaseData.produitPrixAchat,
+                    status: 'pending_check', sellingPrice: null, checkListStatus: {}, 
+                    componentsToReplace: [], isNonRepairable: false, 
+                    functionalComponentsForSalvage: {}, salvageStorageLocation: '', 
+                    technicianNotes: '', repairParts: []
+                };
+                db.stockItems.push(newStockItem);
+                saveDB(db);
+                showMessage('Achat enregistré ! Veuillez signer la lettre de cession.', 'success');
+                
+                genererPreviewLettre(purchaseData, purchaseId);
+                if(previewLettreCessionWrapper) previewLettreCessionWrapper.classList.remove('hidden');
+                initSignaturePad(); 
+                if(previewLettreCessionWrapper) previewLettreCessionWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                btnEnregistrerAchat.disabled = false;
+                btnEnregistrerAchat.innerHTML = originalButtonHtml;
+                formAchat.reset(); 
+                if (dateAchatInput) dateAchatInput.valueAsDate = new Date();
+                loadPredictiveInputs(); 
+            }, 1200);
+        });
+
+        function genererPreviewLettre(data, purchaseId, forModal = false) { 
+            const nomMagasin = document.getElementById('paramNomMagasin')?.value || "2A Mobile";
+            const adresseMagasin = document.getElementById('paramAdresseMagasin')?.value || "Adresse Magasin";
+            const siretMagasin = document.getElementById('paramSiretMagasin')?.value || "SIRET Magasin";
+            const dateCession = data.produitDateAchat ? new Date(data.produitDateAchat).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric'}) : new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric'});
+            
+            let signatureHTML = '';
+            if (forModal && data.signatureDataUrl) {
+                signatureHTML = `
+                    <div class="mt-4">
+                        <p class="font-semibold text-sm">Signature du Vendeur:</p>
+                        <img src="${data.signatureDataUrl}" alt="Signature du vendeur" id="signedCessionModalImageInModal" style="max-width: 200px; max-height: 100px; border: 1px solid #eee; margin-top: 5px;"/>
+                    </div>`;
+            } else if (!forModal) { 
+                 signatureHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 signature-area-placeholder"> 
+                        <div> <p class="font-semibold text-slate-700 mb-2">Signature du Vendeur :</p> <div class="signature-box-placeholder mb-1"></div> <p class="text-xs italic">(Précédée de la mention "Lu et approuvé")</p> </div> 
+                        <div> <p class="font-semibold text-slate-700 mb-2">Signature de l'Acheteur (Pour ${nomMagasin}) :</p> <div class="signature-box-placeholder mb-1"></div> <p class="text-xs italic">(Précédée de la mention "Lu et approuvé")</p> </div> 
+                    </div>`;
+            }
+
+            const letterHTML = `
+                <h4 class="text-center">LETTRE DE CESSION D'UN BIEN D'OCCASION</h4>
+                <p class="text-sm text-slate-600 text-center mb-2">Référence Achat : <strong>${purchaseId}</strong></p>
+                <p class="text-sm text-slate-600 text-center mb-6">Entre les soussignés :</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6"> <div class="section-group"> <p class="font-semibold text-slate-700 mb-1">LE VENDEUR :</p> <p>Nom : <strong>${data.vendeurNom || 'N/A'}</strong></p> <p>Prénom : <strong>${data.vendeurPrenom || 'N/A'}</strong></p> <p>Adresse : <strong>${data.vendeurAdresse || 'N/A'}</strong></p> <p>Téléphone : <strong>${data.vendeurTelephone || 'N/A'}</strong></p> <p>Email : <strong>${data.vendeurEmail || 'N/A'}</strong></p> </div> <div class="section-group"> <p class="font-semibold text-slate-700 mb-1">L'ACHETEUR :</p> <p>Société : <strong>${nomMagasin}</strong></p> <p>Adresse : <strong>${adresseMagasin}</strong></p> <p>SIRET : <strong>${siretMagasin}</strong></p> </div> </div>
+                <p class="font-semibold text-slate-700 mb-1 mt-6">OBJET DE LA CESSION :</p>
+                <div class="section-group mb-6"> <p>Type : <strong>${data.produitCategorie ? data.produitCategorie.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'N/A'}</strong></p> <p>Marque : <strong>${data.produitMarque || 'N/A'}</strong>, Modèle : <strong>${data.produitModele || 'N/A'}</strong></p> <p>N° IMEI/Série : <strong>${data.produitImeiSn || 'N/A'}</strong></p> <p>Capacité : <strong>${data.produitCapacite || 'N/A'}</strong>, Couleur : <strong>${data.produitCouleur || 'N/A'}</strong></p> <p>État déclaré : <strong>${data.produitEtatDeclare ? data.produitEtatDeclare.replace(/_/g, ' ') : 'N/A'}</strong></p> </div>
+                <p class="mt-4">Le vendeur déclare sur l'honneur être le propriétaire légitime du matériel désigné ci-dessus et que celui-ci n'est pas gagé ni volé.</p>
+                <p class="mt-2">La présente cession est consentie et acceptée pour le prix de <strong class="text-indigo-600 text-lg">${parseFloat(data.produitPrixAchat || 0).toFixed(2)} €</strong>, payé ce jour par ${data.produitMoyenPaiement}.</p>
+                <p class="mt-6">Fait en double exemplaire à Villefranche-sur-Saône, le ${dateCession}.</p>
+                ${signatureHTML}
+                <hr class="my-6 border-slate-200"> <p class="text-xs text-slate-500 italic">Le vendeur atteste de l'exactitude des informations fournies et reconnaît avoir reçu le paiement intégral du bien cédé. L'acheteur reconnaît avoir pris connaissance de l'état du bien.</p>
+            `;
+
+            if (forModal) {
+                return letterHTML;
+            } else {
+                if(contenuLettreCession) contenuLettreCession.innerHTML = letterHTML;
+            }
+        }
+        if(btnTelechargerLettre) btnTelechargerLettre.addEventListener('click', async function() { 
+            if ((!signaturePadInstance || signaturePadInstance.isEmpty()) && (!signaturePreview || signaturePreview.classList.contains('hidden') || !signaturePreview.src.startsWith('data:image'))) {
+                showMessage("Veuillez signer et confirmer la signature avant de télécharger.", "error"); return;
+            }
+            const elementToPrint = document.getElementById('lettreCessionPourPdf');
+            if(!elementToPrint) { showMessage("Erreur: Élément à imprimer non trouvé.", "error"); return; }
+
+            const originalButtonText = this.innerHTML;
+            this.disabled = true; this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>Génération...';
+            try {
+                const sigImgInLetter = elementToPrint.querySelector('#signaturePreview');
+                if (sigImgInLetter && signaturePreview && signaturePreview.src.startsWith('data:image')) {
+                    sigImgInLetter.src = signaturePreview.src; sigImgInLetter.classList.remove('hidden');
+                } else if (sigImgInLetter) { sigImgInLetter.classList.add('hidden'); }
+
+                const canvas = await html2canvas(elementToPrint, { scale: 2, useCORS: true, logging: false });
+                const imgData = canvas.toDataURL('image/png');
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+                const imgProps= pdf.getImageProperties(imgData);
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                
+                const db = getDB();
+                const purchaseId = currentPurchaseForSignature ? (db.purchases.find(p => p.produitImeiSn === currentPurchaseForSignature.produitImeiSn)?.id || 'cession') : 'cession';
+                pdf.save(`lettre_cession_${purchaseId}.pdf`);
+                showMessage("Lettre de cession téléchargée.", "success");
+
+                if (currentPurchaseForSignature && signaturePreview && signaturePreview.src.startsWith('data:image')) {
+                    const purchaseToUpdate = db.purchases.find(p => p.id === purchaseId);
+                    if (purchaseToUpdate) { purchaseToUpdate.signatureDataUrl = signaturePreview.src; saveDB(db); }
+                }
+            } catch (error) { console.error("Erreur PDF:", error); showMessage("Erreur lors de la génération du PDF.", "error");
+            } finally {
+                this.disabled = false; this.innerHTML = originalButtonText;
+                const sigImgInLetter = elementToPrint.querySelector('#signaturePreview');
+                 if (sigImgInLetter && (!signaturePreview || !signaturePreview.src.startsWith('data:image'))) { sigImgInLetter.classList.add('hidden');}
+
+            }
+        });
+
+        const statusTranslations = {
+            pending_check: "Attente Vérif.", under_test: "En Test",
+            tests_ok_awaiting_price: "Tests OK", awaiting_repair: "Attente Répa.", 
+            ok_for_sale: "OK Vente", sold: "Vendu", 
+            rejected_for_parts: "Rejeté (Pièces)", rejected: "Rejeté (Autre)"
+        };
+        const smartphoneChecklistItems = [ 
+            { id: 'screen_ok', label: 'Écran (affichage, tactile)' }, { id: 'battery_ok', label: 'Batterie (charge, tenue)' },
+            { id: 'cameras_ok', label: 'Appareils photo (avant, arrière)' }, { id: 'buttons_ok', label: 'Boutons (volume, alimentation)' },
+            { id: 'sound_ok', label: 'Son (HP, micro, écouteurs)' }, { id: 'connectivity_ok', label: 'Connectivité (Wi-Fi, BT, Réseau)' },
+            { id: 'charging_port_ok', label: 'Port de charge' }, { id: 'face_id_touch_id_ok', label: 'Face ID / Touch ID' },
+            { id: 'imei_not_blocked', label: 'IMEI non bloqué'}, { id: 'no_icloud_google_lock', label: 'Aucun compte Cloud bloqué'}
+        ];
+        const salvageableChecklistItems = [
+            { id: 'salvage_screen', label: 'Écran' }, { id: 'salvage_battery', label: 'Batterie' },
+            { id: 'salvage_motherboard', label: 'Carte Mère' }, { id: 'salvage_chassis', label: 'Châssis/Coque Arrière' },
+            { id: 'salvage_camera_main', label: 'Caméra Principale' }, { id: 'salvage_camera_front', label: 'Caméra Avant' },
+            { id: 'salvage_charging_port', label: 'Connecteur de Charge' }, { id: 'salvage_buttons_flex', label: 'Nappes Boutons'}
+        ];
+
+        function generateChecklistHTML(container, checklistDefinition, checkListStatus = {}) { 
+            if(!container) return;
+            container.innerHTML = ''; 
+            checklistDefinition.forEach(item => {
+                const checked = checkListStatus[item.id] ? 'checked' : '';
+                const itemHTML = `<div class="checklist-item"><input type="checkbox" id="check-${item.id}-${container.id}" data-checklist-id="${item.id}" ${checked}><label for="check-${item.id}-${container.id}">${item.label}</label></div>`;
+                container.insertAdjacentHTML('beforeend', itemHTML);
+            });
+        }
+        
+        function renderStockTable() { 
+            if (!stockTableBody || !stockSearchInput || !stockFilterStatus) {
+                console.warn("Éléments du DOM pour le tableau de stock manquants.");
+                return;
+            }
+            const db = getDB();
+            const searchTerm = stockSearchInput.value.toLowerCase();
+            const statusFilter = stockFilterStatus.value;
+            stockTableBody.innerHTML = '';
+            const filteredItems = db.stockItems.filter(item => {
+                const matchesSearch = !searchTerm || item.imeiSn.toLowerCase().includes(searchTerm) ||
+                                      item.marque.toLowerCase().includes(searchTerm) || item.modele.toLowerCase().includes(searchTerm);
+                const matchesStatus = !statusFilter || item.status === statusFilter;
+                return matchesSearch && matchesStatus;
+            });
+
+            if (filteredItems.length === 0) {
+                stockTableBody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-slate-500">Aucun article correspondant aux filtres.</td></tr>`;
+                if(stockEmptyMessage) stockEmptyMessage.style.display = (!searchTerm && !statusFilter && db.stockItems.length === 0) ? 'block' : 'none';
+            } else {
+                if(stockEmptyMessage) stockEmptyMessage.style.display = 'none';
+                filteredItems.forEach(item => {
+                    const row = stockTableBody.insertRow();
+                    const prixVenteDisplay = item.sellingPrice ? `${parseFloat(item.sellingPrice).toFixed(2)} €` : 'N/A';
+                    row.innerHTML = `<td>${item.purchaseId}</td> <td>${item.imeiSn}</td> <td>${item.marque}</td> <td>${item.modele}</td> <td>${new Date(item.dateAchat).toLocaleDateString('fr-FR')}</td> <td><span class="status-badge status-${item.status.replace(/\s+/g, '_')}">${statusTranslations[item.status] || item.status}</span></td> <td>${prixVenteDisplay}</td> <td><button class="btn btn-secondary btn-small btn-view-stock-item" data-id="${item.id}" title="Voir détails"><i class="fas fa-eye"></i></button></td>`;
+                });
+            }
+        }
+
+        if (stockSearchInput) stockSearchInput.addEventListener('input', renderStockTable);
+        if (stockFilterStatus) stockFilterStatus.addEventListener('change', renderStockTable);
+        
+        function openStockItemModal(itemId) { 
+            if (!stockItemModal || !modalTitle || !modalStockId || !modalPurchaseId || !modalImeiSn || !modalMarque || !modalModele || !modalDateAchat || !modalPrixAchat || !modalItemStatus || !modalSellingPrice || !modalChecklistContainer || !modalTechnicianNotes || !modalIsNonRepairableCheckbox || !nonRepairableSectionDiv || !modalSalvageStorageLocationInput || !modalSalvageChecklistContainer || !salvageLocationRequiredStar) {
+                console.error("Un ou plusieurs éléments de la modale de stock sont manquants.");
+                showMessage("Erreur: Impossible d'ouvrir les détails de l'article.", "error");
+                return;
+            }
+            const db = getDB();
+            const item = db.stockItems.find(s => s.id === itemId);
+            if (!item) { showMessage("Article non trouvé.", "error"); return; }
+            currentEditingStockItemId = itemId; 
+            componentsToReplace = item.componentsToReplace ? [...item.componentsToReplace] : []; 
+
+            modalTitle.textContent = `Article: ${item.marque} ${item.modele} (${item.imeiSn})`;
+            modalStockId.textContent = item.id; modalPurchaseId.textContent = item.purchaseId;
+            modalImeiSn.textContent = item.imeiSn; modalMarque.textContent = item.marque;
+            modalModele.textContent = item.modele; modalDateAchat.textContent = new Date(item.dateAchat).toLocaleDateString('fr-FR');
+            modalPrixAchat.textContent = parseFloat(item.prixAchat).toFixed(2);
+            modalItemStatus.value = item.status; modalSellingPrice.value = item.sellingPrice || '';
+            modalTechnicianNotes.value = item.technicianNotes || '';
+            
+            generateChecklistHTML(modalChecklistContainer, smartphoneChecklistItems, item.checkListStatus || {});
+            renderComponentsToReplaceList(); 
+            
+            modalIsNonRepairableCheckbox.checked = item.isNonRepairable || false;
+            if (item.isNonRepairable) {
+                nonRepairableSectionDiv.classList.remove('hidden');
+                salvageLocationRequiredStar.classList.remove('hidden');
+                modalSalvageStorageLocationInput.value = item.salvageStorageLocation || '';
+                generateChecklistHTML(modalSalvageChecklistContainer, salvageableChecklistItems, item.functionalComponentsForSalvage || {});
+            } else {
+                nonRepairableSectionDiv.classList.add('hidden');
+                salvageLocationRequiredStar.classList.add('hidden');
+                modalSalvageStorageLocationInput.value = '';
+                modalSalvageChecklistContainer.innerHTML = '';
+            }
+            stockItemModal.classList.add('active');
+        }
+        function closeStockItemModal() { 
+            if(stockItemModal) stockItemModal.classList.remove('active'); 
+            currentEditingStockItemId = null; 
+            componentsToReplace = []; 
+        }
+
+        if(stockTableBody) stockTableBody.addEventListener('click', function(event) { 
+            const target = event.target.closest('.btn-view-stock-item');
+            if (target) openStockItemModal(target.dataset.id);
+        });
+        if(modalCloseBtn) modalCloseBtn.addEventListener('click', closeStockItemModal);
+        if(modalCloseBtnFooter) modalCloseBtnFooter.addEventListener('click', closeStockItemModal);
+        if(stockItemModal) stockItemModal.addEventListener('click', function(event) { if (event.target === stockItemModal) closeStockItemModal(); });
+
+        if(addComponentToReplaceBtn) addComponentToReplaceBtn.addEventListener('click', () => {
+            if(!componentToReplaceNameInput) return;
+            const name = componentToReplaceNameInput.value.trim();
+            if (name) {
+                componentsToReplace.push({ name: name, partAvailable: false }); 
+                componentToReplaceNameInput.value = '';
+                renderComponentsToReplaceList();
+            }
+        });
+
+        function renderComponentsToReplaceList() {
+            if(!componentsToReplaceListDiv) return;
+            componentsToReplaceListDiv.innerHTML = '';
+            if(componentsToReplace.length === 0) {
+                componentsToReplaceListDiv.innerHTML = '<p class="text-xs text-slate-400">Aucun composant à remplacer ajouté.</p>';
+                return;
+            }
+            componentsToReplace.forEach((comp, index) => {
+                const itemHTML = `
+                    <div class="component-list-item">
+                        <span>${comp.name}</span>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="partAvailable-${index}" data-comp-index="${index}" ${comp.partAvailable ? 'checked' : ''} class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 mr-1">
+                            <label for="partAvailable-${index}" class="text-xs mr-2">Pièce dispo?</label>
+                            <button type="button" class="btn-remove-component" data-comp-index="${index}" title="Supprimer composant"><i class="fas fa-times text-red-500"></i></button>
+                        </div>
+                    </div>`;
+                componentsToReplaceListDiv.insertAdjacentHTML('beforeend', itemHTML);
+            });
+        }
+        
+        if(componentsToReplaceListDiv) componentsToReplaceListDiv.addEventListener('change', (event) => { 
+            if (event.target.type === 'checkbox' && event.target.dataset.compIndex) {
+                const index = parseInt(event.target.dataset.compIndex);
+                if(componentsToReplace[index]) componentsToReplace[index].partAvailable = event.target.checked;
+            }
+        });
+        if(componentsToReplaceListDiv) componentsToReplaceListDiv.addEventListener('click', (event) => { 
+            const removeButton = event.target.closest('.btn-remove-component');
+            if (removeButton && removeButton.dataset.compIndex) {
+                const index = parseInt(removeButton.dataset.compIndex);
+                componentsToReplace.splice(index, 1);
+                renderComponentsToReplaceList();
+            }
+        });
+
+        if(modalIsNonRepairableCheckbox) modalIsNonRepairableCheckbox.addEventListener('change', function() {
+            if(!nonRepairableSectionDiv || !modalSalvageChecklistContainer || !salvageLocationRequiredStar) return;
+            if (this.checked) {
+                nonRepairableSectionDiv.classList.remove('hidden');
+                salvageLocationRequiredStar.classList.remove('hidden');
+                generateChecklistHTML(modalSalvageChecklistContainer, salvageableChecklistItems, {}); 
+            } else {
+                nonRepairableSectionDiv.classList.add('hidden');
+                salvageLocationRequiredStar.classList.add('hidden');
+            }
+        });
+
+        function isChecklistComplete() {
+            if(!modalChecklistContainer) return true;
+            const checklistInputs = modalChecklistContainer.querySelectorAll('input[type="checkbox"]');
+            if (checklistInputs.length === 0) return true; 
+            for (let cb of checklistInputs) {
+                if (!cb.checked) return false;
+            }
+            return true;
+        }
+
+        if(btnSaveStatusAndPrice) btnSaveStatusAndPrice.addEventListener('click', function() {
+            if (!currentEditingStockItemId || !modalItemStatus || !modalSellingPrice) return;
+            let newStatus = modalItemStatus.value; 
+            const newSellingPrice = modalSellingPrice.value.trim() === '' ? null : parseFloat(modalSellingPrice.value);
+
+            if (newSellingPrice !== null && isNaN(newSellingPrice)) {
+                showMessage("Prix de vente invalide.", "error"); return;
+            }
+
+            const checklistValidee = isChecklistComplete();
+            const isNonRepairable = modalIsNonRepairableCheckbox ? modalIsNonRepairableCheckbox.checked : false;
+
+            if (isNonRepairable) { 
+                newStatus = 'rejected_for_parts';
+            } else {
+                if (newStatus === 'ok_for_sale' && !checklistValidee) {
+                    showMessage("La checklist doit être entièrement validée pour passer en 'OK pour vente'.", "error"); return;
+                }
+                if (newStatus === 'ok_for_sale' && newSellingPrice === null) {
+                    showMessage("Un prix de vente doit être défini pour passer en 'OK pour vente'.", "error"); return;
+                }
+                if (checklistValidee && newSellingPrice !== null && (newStatus === 'pending_check' || newStatus === 'under_test' || newStatus === 'tests_ok_awaiting_price')) {
+                    newStatus = 'ok_for_sale';
+                } else if (checklistValidee && newSellingPrice === null && (newStatus === 'pending_check' || newStatus === 'under_test')) {
+                    newStatus = 'tests_ok_awaiting_price';
+                }
+            }
+            modalItemStatus.value = newStatus; 
+
+            let db = getDB();
+            const itemIndex = db.stockItems.findIndex(s => s.id === currentEditingStockItemId);
+            if (itemIndex > -1) {
+                db.stockItems[itemIndex].status = newStatus;
+                db.stockItems[itemIndex].sellingPrice = newSellingPrice;
+                saveDB(db);
+                showMessage("Statut et prix de vente mis à jour.", "success");
+                renderStockTable(); 
+            } else { showMessage("Erreur lors de la mise à jour du statut/prix.", "error"); }
+        });
+        
+        if(btnSaveTechDetails) btnSaveTechDetails.addEventListener('click', function() {
+            if (!currentEditingStockItemId || !modalTechnicianNotes || !modalChecklistContainer || !modalIsNonRepairableCheckbox || !modalSalvageStorageLocationInput || !modalSalvageChecklistContainer) {
+                console.error("Éléments manquants pour la sauvegarde des détails techniques.");
+                return;
+            }
+            
+            const isNonRepairable = modalIsNonRepairableCheckbox.checked;
+            const salvageStorageLoc = modalSalvageStorageLocationInput.value.trim();
+
+            if (isNonRepairable && salvageStorageLoc === '') {
+                showMessage("L'emplacement de stockage des pièces est requis pour un appareil non réparable.", "error");
+                if(modalSalvageStorageLocationInput) modalSalvageStorageLocationInput.focus();
+                return; 
+            }
+            
+            const newNotes = modalTechnicianNotes.value;
+            const newChecklistStatus = {};
+            modalChecklistContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                newChecklistStatus[cb.dataset.checklistId] = cb.checked;
+            });
+
+            const functionalComponentsForSalvage = {};
+            if (isNonRepairable) {
+                modalSalvageChecklistContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                    functionalComponentsForSalvage[cb.dataset.checklistId] = cb.checked;
+                });
+            }
+
+            const checklistValidee = isChecklistComplete();
+            let db = getDB();
+            const itemIndex = db.stockItems.findIndex(s => s.id === currentEditingStockItemId);
+
+            if (itemIndex > -1) {
+                const currentItem = db.stockItems[itemIndex];
+                currentItem.technicianNotes = newNotes;
+                currentItem.checkListStatus = newChecklistStatus;
+                currentItem.componentsToReplace = [...componentsToReplace]; 
+                currentItem.isNonRepairable = isNonRepairable;
+                currentItem.functionalComponentsForSalvage = isNonRepairable ? functionalComponentsForSalvage : {};
+                currentItem.salvageStorageLocation = isNonRepairable ? salvageStorageLoc : '';
+
+                let determinedStatus = currentItem.status; 
+                if (isNonRepairable) {
+                    determinedStatus = 'rejected_for_parts';
+                    Object.keys(functionalComponentsForSalvage).forEach(key => {
+                        if (functionalComponentsForSalvage[key]) { 
+                            const partDefinition = salvageableChecklistItems.find(item => item.id === key);
+                            if (partDefinition) {
+                                const existingPartIndex = (db.spareParts || []).findIndex(
+                                    sp => sp.originalStockItemId === currentItem.id && sp.partName.startsWith(partDefinition.label) 
+                                );
+                                if (existingPartIndex === -1) { 
+                                    db.sparePartIdCounter = (db.sparePartIdCounter || 0) + 1;
+                                    const newSparePart = {
+                                        id: `SP-${String(db.sparePartIdCounter).padStart(4, '0')}`,
+                                        partName: `${partDefinition.label} (Origine: ${currentItem.marque} ${currentItem.modele})`,
+                                        originalStockItemId: currentItem.id,
+                                        originalDeviceMarque: currentItem.marque,
+                                        originalDeviceModele: currentItem.modele,
+                                        originalDeviceColor: currentItem.couleur || 'N/A', 
+                                        partCondition: 'Fonctionnel (Récupéré)', 
+                                        storageLocation: salvageStorageLoc,
+                                        dateAdded: new Date().toISOString().slice(0,10),
+                                        notes: `Récupéré de l'article ${currentItem.id}`
+                                    };
+                                    if (!db.spareParts) db.spareParts = [];
+                                    db.spareParts.push(newSparePart);
+                                }
+                            }
+                        }
+                    });
+                } else if (componentsToReplace.some(comp => !comp.partAvailable)) {
+                    determinedStatus = 'awaiting_repair';
+                } else if (checklistValidee) { 
+                    if (currentItem.sellingPrice !== null && currentItem.sellingPrice !== '') {
+                        determinedStatus = 'ok_for_sale';
+                    } else {
+                        determinedStatus = 'tests_ok_awaiting_price';
+                    }
+                }
+                currentItem.status = determinedStatus;
+                if(modalItemStatus) modalItemStatus.value = currentItem.status; 
+                
+                saveDB(db);
+                showMessage("Détails techniques enregistrés. Statut mis à jour.", "success");
+                renderStockTable(); 
+                if (isNonRepairable) { renderSparePartsTable(); populateSparePartsFilters(); }
+            } else { 
+                showMessage("Erreur lors de l'enregistrement des détails techniques.", "error"); 
+            }
+        });
+
+        if(btnViewSignedCession) btnViewSignedCession.addEventListener('click', function() {
+            if (!currentEditingStockItemId || !viewCessionModalBodyContainer || !viewCessionModal) return;
+            const db = getDB();
+            const stockItem = db.stockItems.find(s => s.id === currentEditingStockItemId);
+            if (stockItem && stockItem.purchaseId) {
+                const purchase = db.purchases.find(p => p.id === stockItem.purchaseId);
+                if (purchase) {
+                    const letterContentHTML = genererPreviewLettre(purchase, purchase.id, true); 
+                    viewCessionModalBodyContainer.innerHTML = letterContentHTML;
+                    viewCessionModal.classList.add('active');
+                } else {
+                    viewCessionModalBodyContainer.innerHTML = '<p class="text-center text-slate-500 py-4">Données de l\'achat introuvables.</p>';
+                    viewCessionModal.classList.add('active');
+                }
+            } else {
+                showMessage("Impossible de trouver l'achat associé à cet article de stock.", "error");
+            }
+        });
+        if(closeViewCessionModalBtn) closeViewCessionModalBtn.addEventListener('click', () => { if(viewCessionModal) viewCessionModal.classList.remove('active'); });
+        if(viewCessionModal) viewCessionModal.addEventListener('click', (e) => { if (e.target === viewCessionModal) viewCessionModal.classList.remove('active'); });
+
+        function renderAvailableStockForSale() { 
+            if(!availableStockForSaleContainer || !venteStockSearchInput || !venteStockFilterCategorie || !availableStockEmptyMessage) return;
+            const db = getDB();
+            const searchTerm = venteStockSearchInput.value.toLowerCase();
+            const categorieFilter = venteStockFilterCategorie.value;
+            
+            availableStockForSaleContainer.innerHTML = ''; 
+            const itemsForSale = db.stockItems.filter(item => {
+                const isOkForSale = item.status === 'ok_for_sale';
+                const matchesSearch = !searchTerm || 
+                                      item.imeiSn.toLowerCase().includes(searchTerm) ||
+                                      item.marque.toLowerCase().includes(searchTerm) ||
+                                      item.modele.toLowerCase().includes(searchTerm);
+                const matchesCategorie = !categorieFilter || item.categorie === categorieFilter;
+                return isOkForSale && matchesSearch && matchesCategorie;
+            });
+
+            if (itemsForSale.length === 0) {
+                availableStockEmptyMessage.classList.remove('hidden');
+                availableStockForSaleContainer.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-slate-500">Aucun article disponible correspondant aux filtres.</td></tr>`;
+            } else {
+                availableStockEmptyMessage.classList.add('hidden');
+                itemsForSale.forEach(item => {
+                    const row = availableStockForSaleContainer.insertRow();
+                    const prixSuggDisplay = item.sellingPrice ? `${parseFloat(item.sellingPrice).toFixed(2)} €` : 'N/D';
+                    row.innerHTML = `
+                        <td>${item.id}</td> <td>${item.marque}</td> <td>${item.modele}</td>
+                        <td>${item.imeiSn}</td> <td>${prixSuggDisplay}</td>
+                        <td><button class="btn btn-success btn-small btn-initiate-sale" data-stock-id="${item.id}"><i class="fas fa-dollar-sign"></i>Vendre</button></td>`;
+                });
+            }
+        }
+        if(venteStockSearchInput) venteStockSearchInput.addEventListener('input', renderAvailableStockForSale);
+        if(venteStockFilterCategorie) venteStockFilterCategorie.addEventListener('change', renderAvailableStockForSale);
+
+        if(availableStockForSaleContainer) availableStockForSaleContainer.addEventListener('click', function(event){ 
+            const target = event.target.closest('.btn-initiate-sale');
+            if(target) {
+                if(!formVente || !venteDateInput || !venteSelectedStockItemIdInput || !venteSelectedArticleInfo || !ventePrixInput || !formVenteCard) return;
+                const stockItemId = target.dataset.stockId;
+                const db = getDB();
+                const itemToSell = db.stockItems.find(item => item.id === stockItemId);
+                if (itemToSell) {
+                    formVente.reset(); 
+                    venteDateInput.valueAsDate = new Date();
+                    venteSelectedStockItemIdInput.value = itemToSell.id;
+                    venteSelectedArticleInfo.textContent = `${itemToSell.marque} ${itemToSell.modele} (IMEI: ${itemToSell.imeiSn})`;
+                    ventePrixInput.value = itemToSell.sellingPrice ? parseFloat(itemToSell.sellingPrice).toFixed(2) : '';
+                    if(!itemToSell.sellingPrice) ventePrixInput.placeholder = "Prix de vente à définir";
+                    formVenteCard.classList.remove('hidden');
+                    formVenteCard.scrollIntoView({ behavior: 'smooth' });
+                } else { showMessage("Article introuvable.", "error"); }
+            }
+        });
+
+        if(btnCancelVente) { 
+            btnCancelVente.addEventListener('click', () => {
+                if(!formVenteCard || !formVente || !venteDateInput || !venteSelectedStockItemIdInput || !venteSelectedArticleInfo) return;
+                formVenteCard.classList.add('hidden');
+                formVente.reset();
+                venteDateInput.valueAsDate = new Date();
+                venteSelectedStockItemIdInput.value = '';
+                venteSelectedArticleInfo.textContent = '-';
+            });
+        }
+
+        if(formVente) formVente.addEventListener('submit', function(event) { 
+            event.preventDefault();
+            if(!venteSelectedStockItemIdInput || !ventePrixInput || !document.getElementById('venteNomAcheteur') || !document.getElementById('venteDate') || !document.getElementById('venteMoyenPaiement') || !btnEnregistrerVente) return;
+
+            const stockItemId = venteSelectedStockItemIdInput.value; 
+            const prixVente = parseFloat(ventePrixInput.value);
+            const nomAcheteur = document.getElementById('venteNomAcheteur').value.trim();
+            const adresseAcheteur = document.getElementById('venteAdresseAcheteur')?.value.trim() || '';
+            const telAcheteur = document.getElementById('venteTelAcheteur')?.value.trim() || '';
+            const emailAcheteur = document.getElementById('venteEmailAcheteur')?.value.trim() || '';
+            const moyenPaiement = document.getElementById('venteMoyenPaiement').value;
+            const dateVente = document.getElementById('venteDate').value;
+            const notesVente = document.getElementById('venteNotes')?.value.trim() || '';
+
+            if (!stockItemId || isNaN(prixVente) || !nomAcheteur || !dateVente || !moyenPaiement) {
+                showMessage("Veuillez remplir tous les champs obligatoires pour la vente.", "error"); return;
+            }
+            let db = getDB();
+            const stockItemIndex = db.stockItems.findIndex(item => item.id === stockItemId);
+            if (stockItemIndex === -1 || db.stockItems[stockItemIndex].status !== 'ok_for_sale') { 
+                showMessage("L'article sélectionné n'est pas disponible pour la vente ou est introuvable.", "error"); return;
+            }
+            
+            const originalButtonHtml = btnEnregistrerVente.innerHTML;
+            btnEnregistrerVente.disabled = true; btnEnregistrerVente.innerHTML = '<i class="fas fa-spinner fa-spin"></i>Enregistrement...';
+
+            setTimeout(() => { 
+                db.saleIdCounter = (db.saleIdCounter || 0) + 1;
+                const saleId = `VTE-${String(db.saleIdCounter).padStart(3, '0')}`;
+                const newSale = {
+                    id: saleId, stockItemId: stockItemId, purchaseId: db.stockItems[stockItemIndex].purchaseId, 
+                    imeiSn: db.stockItems[stockItemIndex].imeiSn, marque: db.stockItems[stockItemIndex].marque, 
+                    modele: db.stockItems[stockItemIndex].modele, prixAchatInitial: db.stockItems[stockItemIndex].prixAchat, 
+                    prixVente: prixVente, nomAcheteur: nomAcheteur, adresseAcheteur: adresseAcheteur,
+                    telAcheteur: telAcheteur, emailAcheteur: emailAcheteur, moyenPaiement: moyenPaiement,
+                    dateVente: dateVente, notes: notesVente
+                };
+                db.sales.push(newSale);
+                db.stockItems[stockItemIndex].status = 'sold'; 
+                db.stockItems[stockItemIndex].sellingPrice = prixVente; 
+                saveDB(db);
+                showMessage(`Vente ${saleId} enregistrée avec succès !`, "success");
+                formVente.reset(); 
+                if (venteDateInput) venteDateInput.valueAsDate = new Date();
+                if(formVenteCard) formVenteCard.classList.add('hidden'); 
+                renderAvailableStockForSale(); 
+                renderVentesList(); 
+                renderStockTable(); 
+                btnEnregistrerVente.disabled = false; btnEnregistrerVente.innerHTML = originalButtonHtml;
+            }, 1000);
+        });
+
+        function renderVentesList() { 
+            if(!ventesListContainer) return;
+            const db = getDB();
+            if (db.sales.length === 0) {
+                ventesListContainer.innerHTML = '<p class="text-slate-500">Aucune vente enregistrée pour le moment.</p>'; return;
+            }
+            let html = '<ul class="space-y-3">';
+            db.sales.slice().reverse().forEach(sale => { 
+                html += `
+                    <li class="p-3 border border-slate-200 rounded-md bg-slate-50 text-sm">
+                        <div class="flex justify-between items-center">
+                            <div> <span class="font-semibold text-indigo-600">${sale.id} - ${sale.marque} ${sale.modele}</span> <span class="text-xs text-slate-500 ml-2">${new Date(sale.dateVente).toLocaleDateString('fr-FR')}</span> </div>
+                            <button class="btn btn-secondary btn-small btn-print-invoice" data-sale-id="${sale.id}" title="Imprimer Facture"><i class="fas fa-print"></i>Facture</button>
+                        </div>
+                        <div>Vendu à: <span class="font-medium">${sale.nomAcheteur}</span> pour <span class="font-medium">${parseFloat(sale.prixVente).toFixed(2)} €</span></div>
+                        <div class="text-xs text-slate-400">IMEI/SN: ${sale.imeiSn} | Payé par: ${sale.moyenPaiement}</div>
+                        ${sale.adresseAcheteur ? `<div class="text-xs text-slate-400">Adresse: ${sale.adresseAcheteur}</div>` : ''}
+                        ${sale.telAcheteur ? `<div class="text-xs text-slate-400">Tél: ${sale.telAcheteur}</div>` : ''}
+                        ${sale.emailAcheteur ? `<div class="text-xs text-slate-400">Email: ${sale.emailAcheteur}</div>` : ''}
+                        ${sale.notes ? `<div class="text-xs mt-1 pt-1 border-t border-slate-100">Notes: ${sale.notes}</div>` : ''}
+                    </li>`;
+            });
+            html += '</ul>';
+            ventesListContainer.innerHTML = html;
+        }
+
+        function generateInvoiceHTML(saleData) { 
+            const nomMagasin = document.getElementById('paramNomMagasin')?.value || "2A Mobile";
+            const adresseMagasin = document.getElementById('paramAdresseMagasin')?.value || "Adresse Magasin";
+            const siretMagasin = document.getElementById('paramSiretMagasin')?.value || "SIRET Magasin";
+            const tvaText = "TVA sur marge - Biens d'occasion (Article 297 A du CGI). TVA non récupérable.";
+            return `
+                <div style="padding: 20px; width: 190mm; margin:auto; background-color: #fff;"> <div style="text-align: center; margin-bottom: 20px;"> <h1>${nomMagasin}</h1> <p>${adresseMagasin}<br>SIRET: ${siretMagasin}</p> </div> <hr> <h2 style="text-align: center; margin-top: 20px; margin-bottom: 20px;">FACTURE N° ${saleData.id}</h2> <div style="display: flex; justify-content: space-between; margin-bottom: 20px;"> <div style="width: 60%;"> <strong>Client:</strong><br> ${saleData.nomAcheteur}<br> ${saleData.adresseAcheteur || ''}<br> Tél: ${saleData.telAcheteur || 'N/A'}<br> Email: ${saleData.emailAcheteur || 'N/A'} </div> <div style="width: 35%; text-align: right;"> <strong>Date de Facturation:</strong> ${new Date(saleData.dateVente).toLocaleDateString('fr-FR')}<br> <strong>Moyen de Paiement:</strong> ${saleData.moyenPaiement} </div> </div> <table style="width: 100%; border-collapse: collapse;"> <thead> <tr> <th style="border: 1px solid #ccc; padding: 8px;">Description</th> <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">Prix Unitaire HT</th> <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">Montant Total HT</th> </tr> </thead> <tbody> <tr> <td style="border: 1px solid #ccc; padding: 8px;"> ${saleData.marque} ${saleData.modele} - ${saleData.imeiSn}<br> <em style="font-size: 0.9em;">(Matériel d'occasion)</em> </td> <td style="border: 1px solid #ccc; padding: 8px; text-align: right;">${parseFloat(saleData.prixVente).toFixed(2)} €</td> <td style="border: 1px solid #ccc; padding: 8px; text-align: right;">${parseFloat(saleData.prixVente).toFixed(2)} €</td> </tr> </tbody> </table> <div style="text-align: right; margin-top: 20px;"> <h3>Total à Payer: ${parseFloat(saleData.prixVente).toFixed(2)} €</h3> </div> <div style="margin-top: 30px; font-size: 0.8em; text-align: center;"> <p>${tvaText}</p> ${saleData.notes ? `<p><strong>Notes:</strong> ${saleData.notes}</p>` : ''} </div> <div style="margin-top: 40px; text-align: center; font-size: 0.8em;"> Merci de votre achat ! </div> </div>`;
+        }
+
+        if(ventesListContainer) ventesListContainer.addEventListener('click', async function(event) { 
+            const target = event.target.closest('.btn-print-invoice');
+            if (target) {
+                if(!invoiceToPrintContainer) { showMessage("Erreur: Conteneur d'impression non trouvé.", "error"); return; }
+                const saleId = target.dataset.saleId;
+                const db = getDB();
+                const saleData = db.sales.find(s => s.id === saleId);
+                if (!saleData) { showMessage("Données de la vente non trouvées.", "error"); return; }
+                
+                const originalButtonHtml = target.innerHTML;
+                target.disabled = true; target.innerHTML = '<i class="fas fa-spinner fa-spin"></i>Génération...';
+                
+                invoiceToPrintContainer.innerHTML = generateInvoiceHTML(saleData);
+                invoiceToPrintContainer.style.width = '210mm'; 
+                invoiceToPrintContainer.classList.remove('hidden'); 
+                
+                try {
+                    await new Promise(resolve => setTimeout(resolve, 100)); 
+
+                    const canvas = await html2canvas(invoiceToPrintContainer, {
+                        scale: 2, useCORS: true, logging: false, windowWidth: invoiceToPrintContainer.scrollWidth, windowHeight: invoiceToPrintContainer.scrollHeight
+                    });
+                    const imgData = canvas.toDataURL('image/png');
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+                    const imgProps = pdf.getImageProperties(imgData);
+                    const pdfWidth = pdf.internal.pageSize.getWidth();
+                    const pageHeight = pdf.internal.pageSize.getHeight();
+                    const margin = 10; 
+                    const contentWidth = pdfWidth - 2 * margin;
+                    let contentHeight = (imgProps.height * contentWidth) / imgProps.width;
+                    
+                    let currentY = margin;
+                    if (contentHeight <= (pageHeight - 2 * margin)) {
+                        pdf.addImage(imgData, 'PNG', margin, currentY, contentWidth, contentHeight);
+                    } else { 
+                        let heightLeft = contentHeight;
+                        let position = currentY;
+                        pdf.addImage(imgData, 'PNG', margin, position, contentWidth, Math.min(heightLeft, pageHeight - 2 * margin));
+                        heightLeft -= (pageHeight - 2* margin);
+                        while(heightLeft > 0) {
+                            pdf.addPage();
+                            position = margin - contentHeight + heightLeft; 
+                            pdf.addImage(imgData, 'PNG', margin, position, contentWidth, contentHeight); 
+                            heightLeft -= (pageHeight- 2*margin);
+                        }
+                         showMessage("Facture générée (peut être sur plusieurs pages).", "info");
+                    }
+
+                    pdf.save(`facture_${saleData.id}.pdf`);
+                    showMessage("Facture PDF générée.", "success");
+                } catch (error) { console.error("Erreur PDF facture:", error); showMessage("Erreur lors de la génération du PDF de la facture.", "error");
+                } finally {
+                    target.disabled = false; target.innerHTML = originalButtonHtml;
+                    invoiceToPrintContainer.innerHTML = ''; invoiceToPrintContainer.classList.add('hidden');
+                }
+            }
+        });
+
+        function initReportSelectors() {
+            if(!reportMonthSelect || !reportYearSelect || !reportTypeSelect || !reportMonthSelectorDiv) return;
+            const currentYear = new Date().getFullYear();
+            const currentMonth = new Date().getMonth() + 1; 
+
+            reportMonthSelect.innerHTML = '';
+            const months = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+            months.forEach((month, index) => {
+                const option = document.createElement('option');
+                option.value = index + 1; option.textContent = month;
+                if ((index + 1) === currentMonth) option.selected = true;
+                reportMonthSelect.appendChild(option);
+            });
+
+            reportYearSelect.innerHTML = '';
+            for (let y = currentYear; y >= currentYear - 5; y--) { 
+                const option = document.createElement('option');
+                option.value = y; option.textContent = y;
+                if (y === currentYear) option.selected = true;
+                reportYearSelect.appendChild(option);
+            }
+            toggleMonthSelectorVisibility(); 
+        }
+        if(reportTypeSelect) reportTypeSelect.addEventListener('change', toggleMonthSelectorVisibility);
+        function toggleMonthSelectorVisibility() {
+            if(!reportTypeSelect || !reportMonthSelectorDiv) return;
+            reportMonthSelectorDiv.style.display = (reportTypeSelect.value === 'tva_marge_annuelle') ? 'none' : 'block';
+        }
+
+        if(btnGenerateReport) btnGenerateReport.addEventListener('click', function() {
+            if(!reportTypeSelect || !reportMonthSelect || !reportYearSelect) return;
+            const type = reportTypeSelect.value;
+            const month = parseInt(reportMonthSelect.value);
+            const year = parseInt(reportYearSelect.value);
+            currentReportDataForExport = null; 
+
+            if (type === 'tva_marge_mensuelle') generateTvaReport(month, year);
+            else if (type === 'tva_marge_annuelle') generateAnnualTvaReport(year);
+            else showMessage("Type de rapport non supporté.", "info");
+        });
+
+        function generateTvaReport(month, year, forAnnual = false) { 
+            if(!reportOutputTitle || !reportOutputContainer || !reportOutputCard || !reportActionsContainer) return;
+            const db = getDB();
+            const salesInPeriod = db.sales.filter(sale => {
+                const saleDate = new Date(sale.dateVente);
+                return saleDate.getFullYear() === year && (forAnnual || (saleDate.getMonth() + 1) === month);
+            });
+
+            let totalMargeBrute = 0; let reportData = []; 
+            salesInPeriod.forEach(sale => {
+                const prixAchat = parseFloat(sale.prixAchatInitial) || 0;
+                const prixVente = parseFloat(sale.prixVente) || 0;
+                const marge = prixVente - prixAchat;
+                if(marge > 0) totalMargeBrute += marge; 
+                reportData.push({
+                    idVente: sale.id, dateVente: new Date(sale.dateVente).toLocaleDateString('fr-FR'),
+                    article: `${sale.marque} ${sale.modele} (${sale.imeiSn})`,
+                    prixAchat: prixAchat.toFixed(2), prixVente: prixVente.toFixed(2), margeBrute: marge.toFixed(2)
+                });
+            });
+            const tvaDue = totalMargeBrute > 0 ? (totalMargeBrute / (1 + TVA_RATE)) * TVA_RATE : 0; 
+
+            if (forAnnual && month) { 
+                 return { month: month, year: year, salesCount: salesInPeriod.filter(s => new Date(s.dateVente).getMonth()+1 === month).length, totalMargeBrute: totalMargeBrute, tvaDue: tvaDue, details: reportData.filter(s => new Date(s.dateVente).getMonth()+1 === month) };
+            }
+
+            currentReportDataForExport = { type: 'mensuel', month: month, year: year, details: reportData, totalMargeBrute, tvaDue };
+            reportOutputTitle.textContent = `Rapport TVA sur Marge - ${reportMonthSelect.options[reportMonthSelect.selectedIndex].text} ${year}`;
+            if (reportData.length === 0) {
+                reportOutputContainer.innerHTML = '<p class="text-slate-500 text-center py-4">Aucune vente pour cette période.</p>';
+            } else {
+                let reportHTML = `<table class="report-table"><thead><tr><th>ID Vente</th><th>Date</th><th>Article</th><th>Prix Achat (€)</th><th>Prix Vente (€)</th><th>Marge Brute (€)</th></tr></thead><tbody>`;
+                reportData.forEach(d => {
+                    reportHTML += `<tr><td>${d.idVente}</td><td>${d.dateVente}</td><td>${d.article}</td><td class="text-right">${d.prixAchat}</td><td class="text-right">${d.prixVente}</td><td class="text-right">${d.margeBrute}</td></tr>`;
+                });
+                reportHTML += `</tbody><tfoot>
+                    <tr><td colspan="5" class="text-right"><strong>Total Marge Brute (assiette TVA):</strong></td><td class="text-right"><strong>${totalMargeBrute.toFixed(2)} €</strong></td></tr>
+                    <tr><td colspan="5" class="text-right"><strong>TVA sur Marge (${(TVA_RATE * 100).toFixed(0)}%):</strong></td><td class="text-right"><strong>${tvaDue.toFixed(2)} €</strong></td></tr>
+                    </tfoot></table>`;
+                reportOutputContainer.innerHTML = reportHTML;
+            }
+            reportOutputCard.classList.remove('hidden');
+            reportActionsContainer.classList.remove('hidden');
+            reportOutputCard.scrollIntoView({behavior: 'smooth'});
+        }
+
+        function generateAnnualTvaReport(year) {
+            if(!reportOutputTitle || !reportOutputContainer || !reportOutputCard || !reportActionsContainer) return;
+            let annualReportHTML = `<h3 class="text-xl font-semibold mb-4">Rapport Annuel TVA sur Marge - Année ${year}</h3>`;
+            let annualDataForExport = { type: 'annuel', year: year, monthlySummaries: [], grandTotalMarge: 0, grandTotalTva: 0 };
+            let grandTotalMargeAnnuelle = 0;
+            let grandTotalTvaAnnuelle = 0;
+            const months = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+            
+            annualReportHTML += `<table class="report-table">
+                <thead><tr><th>Mois</th><th>Nombre de Ventes</th><th>Total Marge Brute HT (€)</th><th>TVA Due (€)</th></tr></thead><tbody>`;
+
+            for (let m = 1; m <= 12; m++) {
+                const monthlyData = generateTvaReport(m, year, true); 
+                grandTotalMargeAnnuelle += monthlyData.totalMargeBrute;
+                grandTotalTvaAnnuelle += monthlyData.tvaDue;
+                annualReportHTML += `<tr>
+                    <td>${months[m-1]} ${year}</td>
+                    <td class="text-right">${monthlyData.salesCount}</td>
+                    <td class="text-right">${monthlyData.totalMargeBrute.toFixed(2)}</td>
+                    <td class="text-right">${monthlyData.tvaDue.toFixed(2)}</td></tr>`;
+                annualDataForExport.monthlySummaries.push({
+                    mois: months[m-1], annee: year, nbVentes: monthlyData.salesCount,
+                    totalMarge: monthlyData.totalMargeBrute.toFixed(2), tvaDue: monthlyData.tvaDue.toFixed(2)
+                });
+            }
+            annualDataForExport.grandTotalMarge = grandTotalMargeAnnuelle.toFixed(2);
+            annualDataForExport.grandTotalTva = grandTotalTvaAnnuelle.toFixed(2);
+            currentReportDataForExport = annualDataForExport; 
+
+            annualReportHTML += `</tbody><tfoot>
+                <tr><td colspan="2" class="text-right"><strong>Total Annuel Marge Brute HT:</strong></td><td class="text-right"><strong>${grandTotalMargeAnnuelle.toFixed(2)} €</strong></td><td></td></tr>
+                <tr><td colspan="2" class="text-right"><strong>Total Annuel TVA Due:</strong></td><td></td><td class="text-right"><strong>${grandTotalTvaAnnuelle.toFixed(2)} €</strong></td></tr>
+            </tfoot></table>`;
+            
+            reportOutputTitle.textContent = `Rapport Annuel TVA sur Marge - ${year}`;
+            reportOutputContainer.innerHTML = annualReportHTML;
+            reportOutputCard.classList.remove('hidden');
+            reportActionsContainer.classList.remove('hidden');
+            reportOutputCard.scrollIntoView({behavior: 'smooth'});
+        }
+
+        if(btnDownloadReportPDF) btnDownloadReportPDF.addEventListener('click', async function() { /* ... (code existant, inchangé) ... */ });
+        if(btnDownloadReportCSV) btnDownloadReportCSV.addEventListener('click', function() { /* ... (code existant, inchangé) ... */ });
+
+        if(globalSearchInput) globalSearchInput.addEventListener('input', function() {
+            const searchTerm = this.value.trim().toLowerCase();
+            if (searchTerm.length > 2 || searchTerm.length === 0) { 
+                performGlobalSearch(searchTerm);
+            } else if (searchTerm.length < 3 && searchTerm.length > 0) {
+                if(globalSearchResultsContainer) globalSearchResultsContainer.innerHTML = '<p class="text-slate-500 text-center py-4">Continuez à taper pour rechercher (minimum 3 caractères)...</p>';
+            } else { 
+                 if(globalSearchResultsContainer) globalSearchResultsContainer.innerHTML = '<p class="text-slate-500 text-center py-4">Entrez un terme de recherche pour trouver des transactions.</p>';
+            }
+        });
+        
+        function performGlobalSearch(term) { 
+            if(!globalSearchResultsContainer) return;
+            const db = getDB(); let results = [];
+            if (term.length === 0) { 
+                globalSearchResultsContainer.innerHTML = '<p class="text-slate-500 text-center py-4">Entrez un terme de recherche pour trouver des transactions.</p>';
+                return;
+            }
+            db.purchases.forEach(p => {
+                if (p.vendeurNom?.toLowerCase().includes(term) || p.vendeurPrenom?.toLowerCase().includes(term) ||
+                    p.produitMarque?.toLowerCase().includes(term) || p.produitModele?.toLowerCase().includes(term) ||
+                    p.produitImeiSn?.toLowerCase().includes(term) || p.id?.toLowerCase().includes(term)) {
+                    results.push({ type: 'Achat', id: p.id, description: `${p.produitMarque} ${p.produitModele} (Vendeur: ${p.vendeurNom} ${p.vendeurPrenom})`, data: p });
+                }
+            });
+            db.stockItems.forEach(s => {
+                if (s.marque?.toLowerCase().includes(term) || s.modele?.toLowerCase().includes(term) ||
+                    s.imeiSn?.toLowerCase().includes(term) || s.id?.toLowerCase().includes(term) || s.purchaseId?.toLowerCase().includes(term)) {
+                    if (!results.some(r => r.type === 'Stock' && r.data.id === s.id)) { 
+                         results.push({ type: 'Stock', id: s.id, description: `${s.marque} ${s.modele} (IMEI: ${s.imeiSn}) - Statut: ${statusTranslations[s.status]}`, data: s });
+                    }
+                }
+            });
+            db.sales.forEach(v => {
+                if (v.nomAcheteur?.toLowerCase().includes(term) || v.marque?.toLowerCase().includes(term) ||
+                    v.modele?.toLowerCase().includes(term) || v.imeiSn?.toLowerCase().includes(term) || v.id?.toLowerCase().includes(term)) {
+                    results.push({ type: 'Vente', id: v.id, description: `${v.marque} ${v.modele} (Client: ${v.nomAcheteur}) - Montant: ${v.prixVente}€`, data: v });
+                }
+            });
+            renderGlobalSearchResults(results, term);
+        }
+        function renderGlobalSearchResults(results, term) { 
+            if(!globalSearchResultsContainer) return;
+            globalSearchResultsContainer.innerHTML = '';
+            if (results.length === 0 && term.length > 0) { 
+                globalSearchResultsContainer.innerHTML = `<p class="text-slate-500 text-center py-4">Aucun résultat pour "<strong>${term}</strong>".</p>`; return;
+            } else if (results.length === 0 && term.length === 0) { 
+                 globalSearchResultsContainer.innerHTML = '<p class="text-slate-500 text-center py-4">Entrez un terme de recherche pour trouver des transactions.</p>'; return;
+            }
+
+            const ul = document.createElement('ul'); ul.className = 'space-y-3';
+            results.forEach(res => {
+                const li = document.createElement('li'); li.className = 'search-result-item cursor-pointer';
+                li.innerHTML = `<span class="type-badge type-${res.type.toLowerCase()}">${res.type}</span> <h4>ID: ${res.id}</h4> <p>${res.description}</p>`;
+                li.addEventListener('click', () => handleSearchResultClick(res));
+                ul.appendChild(li);
+            });
+            globalSearchResultsContainer.appendChild(ul);
+        }
+        function handleSearchResultClick(result) { 
+            showMessage(`Navigation vers ${result.type} ID ${result.id}.`, 'info');
+            if (result.type === 'Stock' && result.data && result.data.id) {
+                const stockTabButton = document.querySelector('.tab-button[data-tab="stock"]');
+                if(stockTabButton) stockTabButton.click();
+                setTimeout(() => openStockItemModal(result.data.id), 100); 
+            } else if (result.type === 'Achat' && result.data && result.data.id) {
+                const achatTabButton = document.querySelector('.tab-button[data-tab="achats"]');
+                if(achatTabButton) achatTabButton.click();
+                setTimeout(() => {
+                    genererPreviewLettre(result.data, result.data.id);
+                    if(result.data.signatureDataUrl && signaturePreview && btnTelechargerLettre) {
+                        signaturePreview.src = result.data.signatureDataUrl;
+                        signaturePreview.classList.remove('hidden');
+                        btnTelechargerLettre.disabled = false;
+                    } else { initSignaturePad(); } 
+                    if(previewLettreCessionWrapper) {
+                        previewLettreCessionWrapper.classList.remove('hidden');
+                        previewLettreCessionWrapper.scrollIntoView({ behavior: 'smooth' });
+                    }
+                },100);
+            } else if (result.type === 'Vente' && result.data && result.data.id) {
+                const venteTabButton = document.querySelector('.tab-button[data-tab="ventes"]');
+                if(venteTabButton) venteTabButton.click();
+            }
+        }
+
+        function loadSparePartPredictiveInputs() {
+            const db = getDB();
+            const predictiveData = db.sparePartPredictiveData || { names: [], marques: [], modeles: {}, colors: [], locations: [] };
+
+            function populateDatalist(datalistElement, items) {
+                if (!datalistElement) return;
+                datalistElement.innerHTML = ''; // Clear existing options
+                new Set(items).forEach(item => { // Use Set to ensure unique values
+                    const option = document.createElement('option');
+                    option.value = item;
+                    datalistElement.appendChild(option);
+                });
+            }
+
+            populateDatalist(sparePartNamesDataList, predictiveData.names);
+            populateDatalist(sparePartMarquesDataList, predictiveData.marques);
+            populateDatalist(sparePartColorsDataList, predictiveData.colors);
+            populateDatalist(sparePartStorageLocationsDataList, predictiveData.locations);
+            
+            if (modalSparePartOriginalDeviceMarqueInput && sparePartModelesDataList) {
+                const currentMarque = modalSparePartOriginalDeviceMarqueInput.value.trim();
+                const modelesForMarque = currentMarque && predictiveData.modeles && predictiveData.modeles[currentMarque] 
+                                        ? predictiveData.modeles[currentMarque] 
+                                        : []; // Default to empty if no marque or no models for marque
+                populateDatalist(sparePartModelesDataList, modelesForMarque);
+            }
+        }
+
+        if (modalSparePartOriginalDeviceMarqueInput) {
+            modalSparePartOriginalDeviceMarqueInput.addEventListener('input', loadSparePartPredictiveInputs);
+             modalSparePartOriginalDeviceMarqueInput.addEventListener('change', (e) => { // Save new marque
+                const db = getDB();
+                const marque = e.target.value.trim();
+                if (marque && !db.sparePartPredictiveData.marques.includes(marque)) {
+                    db.sparePartPredictiveData.marques.push(marque);
+                    if (!db.sparePartPredictiveData.modeles[marque]) { // Initialize models array for new marque
+                        db.sparePartPredictiveData.modeles[marque] = [];
+                    }
+                    saveDB(db);
+                    loadSparePartPredictiveInputs(); 
+                }
+            });
+        }
+         // Save new model for a marque
+        const modalSparePartOriginalDeviceModeleInput = document.getElementById('sparePartOriginalDeviceModele');
+        if (modalSparePartOriginalDeviceModeleInput && modalSparePartOriginalDeviceMarqueInput) {
+            modalSparePartOriginalDeviceModeleInput.addEventListener('change', (e) => {
+                const db = getDB();
+                const modele = e.target.value.trim();
+                const marque = modalSparePartOriginalDeviceMarqueInput.value.trim();
+                if (modele && marque) {
+                    if (!db.sparePartPredictiveData.modeles[marque]) {
+                        db.sparePartPredictiveData.modeles[marque] = [];
+                    }
+                    if (!db.sparePartPredictiveData.modeles[marque].includes(modele)) {
+                        db.sparePartPredictiveData.modeles[marque].push(modele);
+                        saveDB(db);
+                        loadSparePartPredictiveInputs();
+                    }
+                }
+            });
+        }
+
+
+        function renderSparePartsTable() {
+            if (!sparePartsTableBody || !sparePartsSearchInput || !sparePartsFilterMarque || !sparePartsFilterEtat || !sparePartsEmptyMessage) {
+                console.warn("Éléments du DOM pour le tableau des pièces détachées manquants.");
+                return;
+            }
+            const db = getDB();
+            const searchTerm = sparePartsSearchInput.value.toLowerCase();
+            const marqueFilter = sparePartsFilterMarque.value;
+            const etatFilter = sparePartsFilterEtat.value;
+            sparePartsTableBody.innerHTML = '';
+
+            const filteredParts = (db.spareParts || []).filter(part => {
+                const matchesSearch = !searchTerm ||
+                    (part.partName && part.partName.toLowerCase().includes(searchTerm)) ||
+                    (part.originalDeviceMarque && part.originalDeviceMarque.toLowerCase().includes(searchTerm)) ||
+                    (part.originalDeviceModele && part.originalDeviceModele.toLowerCase().includes(searchTerm)) ||
+                    (part.id && part.id.toLowerCase().includes(searchTerm)) ||
+                    (part.originalStockItemId && part.originalStockItemId.toLowerCase().includes(searchTerm));
+                const matchesMarque = !marqueFilter || (part.originalDeviceMarque === marqueFilter);
+                const matchesEtat = !etatFilter || (part.partCondition === etatFilter);
+                return matchesSearch && matchesMarque && matchesEtat;
+            });
+
+            if (filteredParts.length === 0) {
+                sparePartsEmptyMessage.classList.remove('hidden');
+                sparePartsTableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-slate-500">Aucune pièce détachée correspondant aux filtres.</td></tr>`;
+            } else {
+                sparePartsEmptyMessage.classList.add('hidden');
+                filteredParts.forEach(part => {
+                    const row = sparePartsTableBody.insertRow();
+                    row.innerHTML = `
+                        <td>${part.id}</td>
+                        <td>${part.partName || 'N/A'}</td>
+                        <td>${part.originalDeviceMarque || 'N/A'} ${part.originalDeviceModele || ''}</td>
+                        <td>${part.originalDeviceColor || 'N/A'}</td> 
+                        <td>${part.partCondition || 'N/A'}</td>
+                        <td>${part.storageLocation || 'N/A'}</td>
+                        <td>
+                            <button class="btn btn-secondary btn-icon btn-small btn-edit-spare-part" data-id="${part.id}" title="Modifier Pièce"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-danger btn-icon btn-small btn-delete-spare-part" data-id="${part.id}" title="Supprimer Pièce"><i class="fas fa-trash"></i></button>
+                        </td>`;
+                });
+            }
+        }
+        if(sparePartsSearchInput) sparePartsSearchInput.addEventListener('input', renderSparePartsTable);
+        if(sparePartsFilterMarque) sparePartsFilterMarque.addEventListener('change', renderSparePartsTable);
+        if(sparePartsFilterEtat) sparePartsFilterEtat.addEventListener('change', renderSparePartsTable);
+        
+        if(sparePartsTableBody) sparePartsTableBody.addEventListener('click', function(event) {
+            const editButton = event.target.closest('.btn-edit-spare-part');
+            const deleteButton = event.target.closest('.btn-delete-spare-part');
+
+            if (editButton) {
+                const partId = editButton.dataset.id;
+                console.log("Clic Modifier Pièce ID:", partId);
+                openSparePartModalForEdit(partId);
+            } else if (deleteButton) {
+                const partId = deleteButton.dataset.id;
+                console.log("Clic Supprimer Pièce ID:", partId);
+                // IMPORTANT: Implémentez une modale de confirmation personnalisée ici.
+                // Pour l'instant, la suppression est directe à des fins de test.
+                // Exemple: showCustomConfirmDialog("Êtes-vous sûr de vouloir supprimer cette pièce ?", () => deleteSparePart(partId));
+                // Remplacer le confirm() ci-dessous par votre modale personnalisée.
+                // if (confirm(`Supprimer la pièce ${partId} ?`)) { // Remplacer par une modale custom
+                     deleteSparePart(partId);
+                // }
+            }
+        });
+
+        function openSparePartModalForEdit(partId) {
+            if(!formSparePart || !sparePartModalTitle || !sparePartEditingIdInput || !sparePartModal) {
+                 console.error("Éléments de la modale pièce détachée manquants pour l'édition."); return;
+            }
+            const db = getDB();
+            const part = (db.spareParts || []).find(p => p.id === partId);
+            if (!part) {
+                showMessage("Pièce détachée non trouvée.", "error");
+                return;
+            }
+            formSparePart.reset();
+            sparePartModalTitle.textContent = `Modifier Pièce Détachée: ${part.id}`;
+            sparePartEditingIdInput.value = part.id;
+            if(document.getElementById('sparePartName')) document.getElementById('sparePartName').value = part.partName || '';
+            if(document.getElementById('sparePartOriginalDeviceMarque')) document.getElementById('sparePartOriginalDeviceMarque').value = part.originalDeviceMarque || '';
+            if(document.getElementById('sparePartOriginalDeviceModele')) document.getElementById('sparePartOriginalDeviceModele').value = part.originalDeviceModele || '';
+            if(document.getElementById('sparePartColor')) document.getElementById('sparePartColor').value = part.originalDeviceColor || '';
+            if(document.getElementById('sparePartCondition')) document.getElementById('sparePartCondition').value = part.partCondition || 'Fonctionnel (Récupéré)';
+            if(document.getElementById('sparePartStorageLocation')) document.getElementById('sparePartStorageLocation').value = part.storageLocation || '';
+            if(document.getElementById('sparePartNotes')) document.getElementById('sparePartNotes').value = part.notes || '';
+            
+            loadSparePartPredictiveInputs(); 
+            sparePartModal.classList.add('active');
+        }
+        
+        function deleteSparePart(partId) {
+            let db = getDB();
+            db.spareParts = (db.spareParts || []).filter(p => p.id !== partId);
+            saveDB(db);
+            showMessage(`Pièce ${partId} supprimée.`, 'success');
+            renderSparePartsTable();
+            populateSparePartsFilters();
+        }
+
+        if(btnAddSparePartManually) {
+             btnAddSparePartManually.addEventListener('click', () => {
+                console.log("Bouton 'Ajouter Pièce Manuellement' cliqué.");
+                if (!formSparePart) { console.error("formSparePart est null."); showMessage("Erreur: Formulaire pièce non initialisé.", "error"); return; }
+                if (!sparePartModal) { console.error("sparePartModal est null."); showMessage("Erreur: Modale pièce non affichable.", "error"); return; }
+                
+                try {
+                    formSparePart.reset();
+                    if(sparePartModalTitle) sparePartModalTitle.textContent = "Ajouter une Pièce Détachée Manuellement";
+                    if(sparePartEditingIdInput) sparePartEditingIdInput.value = '';
+                    loadSparePartPredictiveInputs(); 
+                    sparePartModal.classList.add('active');
+                    console.log("Classe 'active' ajoutée à sparePartModal.");
+                } catch (e) {
+                    console.error("Erreur dans le handler de btnAddSparePartManually:", e);
+                    showMessage("Une erreur est survenue lors de l'ouverture de la modale.", "error");
+                }
+            });
+        } else {
+            console.error("Élément btnAddSparePartManually non trouvé lors de l'attachement de l'écouteur.");
+        }
+
+        if(closeSparePartModalBtn) closeSparePartModalBtn.addEventListener('click', () => {if(sparePartModal) sparePartModal.classList.remove('active');});
+        if(cancelSparePartFormBtn) cancelSparePartFormBtn.addEventListener('click', () => {if(sparePartModal) sparePartModal.classList.remove('active');});
+        if(sparePartModal) sparePartModal.addEventListener('click', (e) => { if (e.target === sparePartModal) sparePartModal.classList.remove('active'); });
+
+        if(formSparePart) formSparePart.addEventListener('submit', function(event) {
+            event.preventDefault();
+            if(!sparePartEditingIdInput) return;
+            const formData = new FormData(formSparePart);
+            const partDataFromForm = Object.fromEntries(formData.entries());
+            const editingId = sparePartEditingIdInput.value;
+            let db = getDB();
+
+            if (!db.sparePartPredictiveData) {
+                db.sparePartPredictiveData = { names: [], marques: [], modeles: {}, colors: [], locations: [] };
+            }
+            if (!db.sparePartPredictiveData.modeles) { 
+                db.sparePartPredictiveData.modeles = {};
+            }
+
+            const partDetails = {
+                partName: partDataFromForm.sparePartName.trim(),
+                originalDeviceMarque: partDataFromForm.sparePartOriginalDeviceMarque.trim(),
+                originalDeviceModele: partDataFromForm.sparePartOriginalDeviceModele.trim(),
+                originalDeviceColor: partDataFromForm.sparePartColor.trim(),
+                partCondition: partDataFromForm.sparePartCondition,
+                storageLocation: partDataFromForm.sparePartStorageLocation.trim(),
+                notes: partDataFromForm.sparePartNotes.trim(),
+            };
+
+            if (partDetails.partName && !db.sparePartPredictiveData.names.includes(partDetails.partName)) {
+                db.sparePartPredictiveData.names.push(partDetails.partName);
+            }
+            if (partDetails.originalDeviceMarque && !db.sparePartPredictiveData.marques.includes(partDetails.originalDeviceMarque)) {
+                db.sparePartPredictiveData.marques.push(partDetails.originalDeviceMarque);
+            }
+            if (partDetails.originalDeviceMarque && partDetails.originalDeviceModele) {
+                if (!db.sparePartPredictiveData.modeles[partDetails.originalDeviceMarque]) {
+                    db.sparePartPredictiveData.modeles[partDetails.originalDeviceMarque] = [];
+                }
+                if (!db.sparePartPredictiveData.modeles[partDetails.originalDeviceMarque].includes(partDetails.originalDeviceModele)) {
+                    db.sparePartPredictiveData.modeles[partDetails.originalDeviceMarque].push(partDetails.originalDeviceModele);
+                }
+            }
+            if (partDetails.originalDeviceColor && !db.sparePartPredictiveData.colors.includes(partDetails.originalDeviceColor)) {
+                db.sparePartPredictiveData.colors.push(partDetails.originalDeviceColor);
+            }
+            if (partDetails.storageLocation && !db.sparePartPredictiveData.locations.includes(partDetails.storageLocation)) {
+                db.sparePartPredictiveData.locations.push(partDetails.storageLocation);
+            }
+
+            if (editingId) { 
+                const partIndex = (db.spareParts || []).findIndex(p => p.id === editingId);
+                if (partIndex > -1) {
+                    db.spareParts[partIndex] = { ...db.spareParts[partIndex], ...partDetails };
+                    showMessage(`Pièce ${editingId} mise à jour.`, "success");
+                } else {
+                    showMessage(`Erreur: Pièce ${editingId} non trouvée.`, "error"); return;
+                }
+            } else { 
+                db.sparePartIdCounter = (db.sparePartIdCounter || 0) + 1;
+                const newPartId = `SPM-${String(db.sparePartIdCounter).padStart(4, '0')}`;
+                const newPart = {
+                    id: newPartId,
+                    ...partDetails, 
+                    dateAdded: new Date().toISOString().slice(0,10),
+                    originalStockItemId: null 
+                };
+                if (!db.spareParts) db.spareParts = [];
+                db.spareParts.push(newPart);
+                showMessage(`Nouvelle pièce ${newPartId} ajoutée.`, "success");
+            }
+            saveDB(db);
+            renderSparePartsTable();
+            populateSparePartsFilters(); 
+            if(sparePartModal) sparePartModal.classList.remove('active');
+        });
+        
+        function populateSparePartsFilters() {
+            if (!sparePartsFilterMarque) { console.warn("sparePartsFilterMarque non trouvé."); return; }
+            const db = getDB();
+            const marques = new Set((db.spareParts || []).map(p => p.originalDeviceMarque).filter(Boolean));
+            
+            const currentMarqueValue = sparePartsFilterMarque.value;
+            sparePartsFilterMarque.innerHTML = '<option value="">Toutes Marques Orig.</option>';
+            marques.forEach(marque => {
+                const option = document.createElement('option');
+                option.value = marque;
+                option.textContent = marque;
+                if (marque === currentMarqueValue) option.selected = true;
+                sparePartsFilterMarque.appendChild(option);
+            });
+        }
+        
+        console.log("Fin de l'initialisation de GestOccasIA.");
+    });
+    </script>
+</body>
+</html>
